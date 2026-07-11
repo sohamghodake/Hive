@@ -8,7 +8,7 @@ class AgentCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = None
     system_prompt: str
-    model: str = "claude-sonnet-4-20250514"
+    model: str = "kimi-k2.7-code:cloud"
     tools: list[str] = []
     config: dict = {}
 

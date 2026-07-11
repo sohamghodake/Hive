@@ -1,22 +1,26 @@
 """Seed the database with a default agent for local development."""
 import asyncio
+import os
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from api.config import settings
 from api.models.agent import Agent
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql+asyncpg://hive:hivepass@localhost:5432/hive"
+)
 
 
 async def main():
-    engine = create_async_engine(settings.database_url)
+    engine = create_async_engine(DATABASE_URL)
     factory = async_sessionmaker(engine, expire_on_commit=False)
 
     async with factory() as db:
-        existing = await db.execute(
-            __import__("sqlalchemy").select(Agent).where(Agent.name == "research-agent")
-        )
-        if existing.scalar_one_or_none():
+        result = await db.execute(select(Agent).where(Agent.name == "research-agent"))
+        if result.scalar_one_or_none():
             print("Seed agent already exists.")
+            await engine.dispose()
             return
 
         agent = Agent(
@@ -28,7 +32,7 @@ async def main():
                 "and query_database to look up internal data. "
                 "Produce clear, structured summaries."
             ),
-            model="claude-sonnet-4-20250514",
+            model="kimi-k2.7-code:cloud",
             tools=["read_file", "write_file", "web_search", "query_database"],
         )
         db.add(agent)

@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Sidebar } from "@/components/Sidebar";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
+
+const sans = Plus_Jakarta_Sans({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
 
 export const metadata: Metadata = {
   title: "Hive — AI Agent Platform",
@@ -15,11 +30,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-950 text-neutral-100 min-h-screen`}>
+      <body
+        className={`${display.variable} ${sans.variable} ${mono.variable}`}
+        style={{ margin: 0, padding: 0, WebkitFontSmoothing: "antialiased" }}
+      >
         <Providers>
-          <div className="flex h-screen">
+          <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
             <Sidebar />
-            <main className="flex-1 overflow-y-auto p-6">{children}</main>
+            <main style={{ flex: 1, overflowY: "auto", background: "var(--c-base)" }}>
+              {children}
+            </main>
           </div>
         </Providers>
       </body>

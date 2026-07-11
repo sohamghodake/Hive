@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class RunCreate(BaseModel):
     agent_id: uuid.UUID
     input: dict
-    metadata: dict = {}
+    run_metadata: dict = {}
 
 
 class RunOut(BaseModel):
@@ -19,7 +19,7 @@ class RunOut(BaseModel):
     input: dict
     output: dict | None
     error: str | None
-    metadata: dict
+    run_metadata: dict
     started_at: datetime | None
     finished_at: datetime | None
     created_at: datetime

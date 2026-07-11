@@ -1,19 +1,30 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { useRef } from "react";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+function UploadIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden>
+      <path d="M6.5 1V8.5M4 3.5L6.5 1L9 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M1 11H12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+const COL = "1fr 140px 80px 120px";
+
 export default function DocumentsPage() {
   const qc = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+
   const { data: docs = [], isLoading } = useQuery({
     queryKey: ["documents"],
     queryFn: api.documents.list,
   });
-
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const upload = useMutation({
     mutationFn: async (file: File) => {
@@ -27,19 +38,41 @@ export default function DocumentsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Documents</h1>
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 40px" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 28 }}>
+        <div>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.09em", color: "var(--c-text-3)", margin: "0 0 4px 0" }}>
+            Platform
+          </p>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--c-text-1)", margin: 0 }}>
+            Documents
+          </h1>
+        </div>
         <button
           onClick={() => fileRef.current?.click()}
-          className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "8px 14px",
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: "pointer",
+            color: "var(--c-accent)",
+            background: "var(--c-accent-muted)",
+            border: "1px solid var(--c-accent-border)",
+            fontFamily: "var(--font-sans)",
+          }}
         >
+          <UploadIcon />
           Upload
         </button>
         <input
           ref={fileRef}
           type="file"
-          className="hidden"
+          style={{ display: "none" }}
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) upload.mutate(f);
@@ -47,28 +80,93 @@ export default function DocumentsPage() {
         />
       </div>
 
-      {upload.isPending && <p className="text-blue-400 text-sm">Uploading…</p>}
-      {upload.isError && <p className="text-red-400 text-sm">{String(upload.error)}</p>}
+      {upload.isPending && (
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--c-live)", marginBottom: 16 }}>
+          Uploading…
+        </p>
+      )}
+      {upload.isError && (
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--c-err)", marginBottom: 16 }}>
+          {String(upload.error)}
+        </p>
+      )}
 
-      <div className="bg-neutral-900 border border-neutral-800 rounded-xl divide-y divide-neutral-800">
+      <div className="hive-card" style={{ overflow: "hidden" }}>
+        {/* Header */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: COL,
+            gap: 16,
+            padding: "10px 20px",
+            borderBottom: "1px solid var(--c-border)",
+          }}
+        >
+          {["Name", "Type", "Size", "Added"].map((h) => (
+            <span
+              key={h}
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                textTransform: "uppercase",
+                letterSpacing: "0.09em",
+                color: "var(--c-text-3)",
+              }}
+            >
+              {h}
+            </span>
+          ))}
+        </div>
+
         {docs.map((doc) => (
-          <div key={doc.id} className="flex items-center gap-4 px-5 py-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{doc.name}</p>
-              <p className="text-xs text-neutral-500">
-                {doc.content_type} · {doc.size_bytes != null ? `${doc.size_bytes} bytes` : "?"}
+          <div
+            key={doc.id}
+            className="hive-row"
+            style={{
+              display: "grid",
+              gridTemplateColumns: COL,
+              gap: 16,
+              alignItems: "center",
+              padding: "13px 20px",
+              borderBottom: "1px solid var(--c-divider)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "var(--c-text-1)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {doc.name}
               </p>
+              {doc.embedded && (
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    padding: "1px 6px",
+                    borderRadius: 4,
+                    color: "var(--c-ok)",
+                    background: "var(--c-ok-muted)",
+                    flexShrink: 0,
+                  }}
+                >
+                  embedded
+                </span>
+              )}
             </div>
-            {doc.embedded && (
-              <span className="text-xs bg-green-900/40 text-green-400 px-2 py-0.5 rounded">
-                embedded
-              </span>
-            )}
-            <span className="text-xs text-neutral-500 shrink-0">{formatDate(doc.created_at)}</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {doc.content_type}
+            </span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-text-3)", fontVariantNumeric: "tabular-nums" }}>
+              {doc.size_bytes != null ? `${(doc.size_bytes / 1024).toFixed(1)} KB` : "—"}
+            </span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-text-3)" }}>
+              {formatDate(doc.created_at)}
+            </span>
           </div>
         ))}
+
         {!isLoading && docs.length === 0 && (
-          <p className="px-5 py-4 text-sm text-neutral-500">No documents uploaded yet.</p>
+          <p style={{ padding: "40px 20px", textAlign: "center", fontSize: 13, color: "var(--c-text-3)" }}>
+            No documents yet. Upload a file to get started.
+          </p>
         )}
       </div>
     </div>

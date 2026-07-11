@@ -1,7 +1,7 @@
 """End-to-end smoke test: create an agent, trigger a run, poll until done.
 
 Usage:
-    ANTHROPIC_API_KEY=sk-ant-... python scripts/example_run.py
+    python scripts/example_run.py
 """
 import asyncio
 import os
@@ -26,7 +26,7 @@ async def main():
                 "You are a concise assistant. When asked a question, "
                 "answer it directly without using any tools unless necessary."
             ),
-            "model": "claude-sonnet-4-20250514",
+            "model": "kimi-k2.7-code:cloud",
             "tools": ["web_search"],
         })
         if r.status_code == 201:

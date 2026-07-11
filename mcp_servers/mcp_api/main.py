@@ -1,34 +1,32 @@
-"""MCP server for external API integrations (HTTP, email, webhooks)."""
-import os
-
 import httpx
-from fastmcp import FastMCP
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-mcp = FastMCP("mcp-api", port=8004)
+app = FastAPI(title="mcp-api")
 
 
-@mcp.tool()
-async def http_get(url: str, headers: dict | None = None) -> dict:
-    """Perform a GET request to an external URL."""
+class Params(BaseModel):
+    params: dict
+
+
+@app.post("/tools/http_get")
+async def http_get(body: Params):
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.get(url, headers=headers or {})
-        return {
-            "status_code": resp.status_code,
-            "body": resp.text,
-            "headers": dict(resp.headers),
-        }
+        r = await client.get(body.params["url"], headers=body.params.get("headers", {}))
+        return {"status_code": r.status_code, "body": r.text}
 
 
-@mcp.tool()
-async def http_post(url: str, payload: dict, headers: dict | None = None) -> dict:
-    """Perform a POST request with a JSON payload to an external URL."""
+@app.post("/tools/http_post")
+async def http_post(body: Params):
     async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(url, json=payload, headers=headers or {})
-        return {
-            "status_code": resp.status_code,
-            "body": resp.text,
-        }
+        r = await client.post(
+            body.params["url"],
+            json=body.params.get("payload", {}),
+            headers=body.params.get("headers", {}),
+        )
+        return {"status_code": r.status_code, "body": r.text}
 
 
-if __name__ == "__main__":
-    mcp.run()
+@app.get("/health")
+def health():
+    return {"status": "ok"}

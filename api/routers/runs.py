@@ -25,7 +25,7 @@ async def list_runs(db=DBSession, limit: int = 50, offset: int = 0):
 
 @router.post("", response_model=RunOut, status_code=201)
 async def create_run(body: RunCreate, background: BackgroundTasks, db=DBSession):
-    run = Run(agent_id=body.agent_id, input=body.input, metadata=body.metadata)
+    run = Run(agent_id=body.agent_id, input=body.input, run_metadata=body.run_metadata)
     db.add(run)
     await db.commit()
     await db.refresh(run)

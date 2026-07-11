@@ -1,58 +1,60 @@
-"""MCP server for sandboxed file I/O using FastMCP."""
 import os
 from pathlib import Path
 
 import aiofiles
-from fastmcp import FastMCP
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 WORKSPACE = Path(os.getenv("WORKSPACE_PATH", "/workspace")).resolve()
 
-mcp = FastMCP("mcp-file", port=8001)
+app = FastAPI(title="mcp-file")
 
 
 def _safe_path(relative: str) -> Path:
     resolved = (WORKSPACE / relative).resolve()
     if not str(resolved).startswith(str(WORKSPACE)):
-        raise ValueError(f"Path escapes workspace: {relative}")
+        raise HTTPException(400, f"Path escapes workspace: {relative}")
     return resolved
 
 
-@mcp.tool()
-async def read_file(path: str) -> str:
-    """Read a file from the sandboxed workspace."""
-    p = _safe_path(path)
+class Params(BaseModel):
+    params: dict
+
+
+@app.post("/tools/read_file")
+async def read_file(body: Params):
+    p = _safe_path(body.params["path"])
     if not p.exists():
-        raise FileNotFoundError(f"{path} not found in workspace")
+        raise HTTPException(404, f"{body.params['path']} not found")
     async with aiofiles.open(p) as f:
-        return await f.read()
+        return {"content": await f.read()}
 
 
-@mcp.tool()
-async def write_file(path: str, content: str) -> str:
-    """Write content to a file in the sandboxed workspace."""
-    p = _safe_path(path)
+@app.post("/tools/write_file")
+async def write_file(body: Params):
+    p = _safe_path(body.params["path"])
     p.parent.mkdir(parents=True, exist_ok=True)
+    content = body.params["content"]
     async with aiofiles.open(p, "w") as f:
         await f.write(content)
-    return f"Written {len(content)} bytes to {path}"
+    return {"result": f"Written {len(content)} bytes to {body.params['path']}"}
 
 
-@mcp.tool()
-async def list_files(directory: str = "") -> list[str]:
-    """List files in a workspace directory."""
-    p = _safe_path(directory)
+@app.post("/tools/list_files")
+async def list_files(body: Params):
+    p = _safe_path(body.params.get("directory", ""))
     if not p.is_dir():
-        raise NotADirectoryError(f"{directory} is not a directory")
-    return [str(child.relative_to(WORKSPACE)) for child in p.iterdir()]
+        raise HTTPException(400, "Not a directory")
+    return {"files": [str(c.relative_to(WORKSPACE)) for c in p.iterdir()]}
 
 
-@mcp.tool()
-async def delete_file(path: str) -> str:
-    """Delete a file from the sandboxed workspace."""
-    p = _safe_path(path)
+@app.post("/tools/delete_file")
+async def delete_file(body: Params):
+    p = _safe_path(body.params["path"])
     p.unlink(missing_ok=True)
-    return f"Deleted {path}"
+    return {"result": f"Deleted {body.params['path']}"}
 
 
-if __name__ == "__main__":
-    mcp.run()
+@app.get("/health")
+def health():
+    return {"status": "ok"}
