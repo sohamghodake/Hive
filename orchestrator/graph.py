@@ -5,7 +5,7 @@ import os
 import uuid
 from datetime import datetime, timezone
 
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
 
 from orchestrator.nodes import act, finalize, should_continue, think
@@ -51,7 +51,11 @@ async def run_agent(run_id: str) -> None:
                 return
             agent = await db.get(Agent, run.agent_id) if run.agent_id else None
             system_prompt = agent.system_prompt if agent else "You are a helpful assistant."
-            user_input = run.input.get("message", str(run.input))
+            user_input = (
+                run.input.get("task")
+                or run.input.get("message")
+                or str(run.input)
+            )
 
             run.status = "running"
             run.started_at = datetime.now(timezone.utc)
@@ -60,7 +64,10 @@ async def run_agent(run_id: str) -> None:
         initial: AgentState = {
             "run_id": run_id,
             "agent_id": str(run.agent_id),
-            "messages": [HumanMessage(content=user_input)],
+            "messages": [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=user_input),
+            ],
             "steps_completed": 0,
             "tool_results": [],
             "final_output": None,

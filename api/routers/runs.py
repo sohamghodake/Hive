@@ -46,6 +46,17 @@ async def get_run(run_id: uuid.UUID, db=DBSession):
     return run
 
 
+@router.delete("/{run_id}", status_code=204)
+async def delete_run(run_id: uuid.UUID, db=DBSession):
+    run = await db.get(Run, run_id)
+    if not run:
+        raise HTTPException(404, "Run not found")
+    if run.status == "running":
+        raise HTTPException(409, "Cannot delete a run that is currently running")
+    await db.delete(run)
+    await db.commit()
+
+
 @router.get("/{run_id}/stream")
 async def stream_run(run_id: uuid.UUID, db=DBSession):
     """SSE endpoint — streams step events as they're written to the DB."""

@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir \
     asyncpg \
     alembic \
     langchain-openai \
+    langchain-groq \
     langgraph \
     mcp \
     fastmcp \

@@ -40,6 +40,14 @@ async def get_document(doc_id: uuid.UUID, db=DBSession):
     return doc
 
 
+@router.get("/{doc_id}/content")
+async def get_document_content(doc_id: uuid.UUID, db=DBSession):
+    doc = await db.get(Document, doc_id)
+    if not doc:
+        raise HTTPException(404, "Document not found")
+    return {"id": str(doc.id), "name": doc.name, "content": doc.content, "content_type": doc.content_type}
+
+
 @router.delete("/{doc_id}", status_code=204)
 async def delete_document(doc_id: uuid.UUID, db=DBSession):
     doc = await db.get(Document, doc_id)

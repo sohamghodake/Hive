@@ -41,11 +41,50 @@ async def query_database(sql: str) -> list[dict]:
 
 
 @tool
-async def web_search(query: str, num_results: int = 5) -> list[dict]:
+async def list_files(directory: str = "") -> list[str]:
+    """List files in the sandboxed workspace directory."""
+    result = await _mcp_call(settings.mcp_file_url, "list_files", {"directory": directory})
+    return result.get("files", [])
+
+
+@tool
+async def http_get(url: str) -> str:
+    """Perform an HTTP GET request and return the response body as text."""
+    result = await _mcp_call(settings.mcp_api_url, "http_get", {"url": url})
+    return result.get("body", "")
+
+
+@tool
+async def web_search(query: str) -> list[dict]:
     """Search the web and return a list of results with title, url, and snippet."""
-    result = await _mcp_call(settings.mcp_search_url, "search", {"query": query, "num_results": num_results})
+    result = await _mcp_call(settings.mcp_search_url, "search", {"query": query, "num_results": 5})
     return result.get("results", [])
 
 
-ALL_TOOLS = [read_file, write_file, query_database, web_search]
+@tool
+async def list_documents() -> list[dict]:
+    """List all documents uploaded to the knowledge base. Returns id, name, and content_type."""
+    result = await _mcp_call(
+        settings.mcp_db_url, "query",
+        {"sql": "SELECT id::text, name, content_type, size_bytes FROM documents ORDER BY created_at DESC LIMIT 50"}
+    )
+    return result.get("rows", [])
+
+
+@tool
+async def read_document(document_id: str) -> str:
+    """Read the full text content of a document from the knowledge base by its UUID.
+    Use list_documents first to find the correct document_id."""
+    import re
+    if not re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', document_id.lower()):
+        return "Error: document_id must be a valid UUID"
+    result = await _mcp_call(
+        settings.mcp_db_url, "query",
+        {"sql": f"SELECT content FROM documents WHERE id = '{document_id}'"}
+    )
+    rows = result.get("rows", [])
+    return rows[0].get("content", "Document not found") if rows else "Document not found"
+
+
+ALL_TOOLS = [read_file, write_file, list_files, query_database, web_search, http_get, list_documents, read_document]
 TOOL_MAP = {t.name: t for t in ALL_TOOLS}

@@ -6,7 +6,7 @@ import os
 from datetime import datetime, timezone
 
 from langchain_core.messages import AIMessage, ToolMessage
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 
 from orchestrator.state import AgentState
 from orchestrator.tools import ALL_TOOLS, TOOL_MAP
@@ -19,9 +19,8 @@ _llm_instance = None
 def _get_llm():
     global _llm_instance
     if _llm_instance is None:
-        _llm_instance = ChatOpenAI(
+        _llm_instance = ChatGroq(
             model=os.getenv("LLM_MODEL", "llama-3.3-70b-versatile"),
-            base_url=os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1"),
             api_key=os.getenv("LLM_API_KEY", ""),
             max_tokens=8096,
         ).bind_tools(ALL_TOOLS)

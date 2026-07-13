@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { api, type RunDetail, type Step } from "@/lib/api";
+import { api, type RunDetail, type Step, type Agent } from "@/lib/api";
 import { statusColor, statusMuted, formatDate, durationMs } from "@/lib/utils";
 
 function StatusPill({ status, large }: { status: string; large?: boolean }) {
@@ -210,12 +210,14 @@ function ToolCallList({ run }: { run: RunDetail }) {
   );
 }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
 function LiveStream({ runId }: { runId: string }) {
   const [events, setEvents] = useState<string[]>([]);
   const ref = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    const es = new EventSource(`/api/runs/${runId}/stream`);
+    const es = new EventSource(`${API_BASE}/api/runs/${runId}/stream`);
     ref.current = es;
     es.onmessage = (e) => setEvents((prev) => [...prev, e.data]);
     es.onerror = () => es.close();
@@ -238,6 +240,8 @@ function LiveStream({ runId }: { runId: string }) {
 
 export default function RunDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { data: agents = [] } = useQuery({ queryKey: ["agents"], queryFn: api.agents.list });
+  const agentMap = Object.fromEntries(agents.map((a: { id: string; name: string }) => [a.id, a.name]));
   const { data: run, isLoading } = useQuery({
     queryKey: ["run", id],
     queryFn: () => api.runs.get(id),
@@ -265,11 +269,26 @@ export default function RunDetailPage() {
       </div>
 
       {/* Title */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
         <h1 style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 600, color: "var(--c-text-1)", margin: 0 }}>
           {run.id.slice(0, 8)}<span style={{ color: "var(--c-text-3)" }}>…</span>
         </h1>
         <StatusPill status={run.status} large />
+        {run.agent_id && agentMap[run.agent_id] && (
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              padding: "3px 10px",
+              borderRadius: 6,
+              color: "var(--c-accent)",
+              background: "var(--c-accent-muted)",
+              border: "1px solid var(--c-accent-border)",
+            }}
+          >
+            {agentMap[run.agent_id]}
+          </span>
+        )}
       </div>
 
       {/* Meta strip */}
