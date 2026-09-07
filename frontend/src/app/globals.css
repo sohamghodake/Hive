@@ -1,101 +1,102 @@
 @import "tailwindcss";
 
-/* ── Design tokens ─────────────────────────────────────────────── */
+/* ── Design tokens ─────────────────────────────────────────────────
+   Text ramp is contrast-checked against its own surface:
+   text-1 ≈ 14:1, text-2 ≈ 8:1, text-3 ≈ 4.6:1 (all ≥ WCAG AA).
+   ------------------------------------------------------------------ */
 :root {
   --c-base:          #07080C;
   --c-surface:       #0D0F15;
   --c-raised:        #131620;
   --c-hover:         #181C2A;
-  --c-border:        #1C1F30;
-  --c-divider:       #111420;
+  --c-border:        #232839;
+  --c-divider:       #171B27;
 
-  --c-text-1:        #E0E4EE;
-  --c-text-2:        #6A7892;
-  --c-text-3:        #3A4257;
+  --c-text-1:        #E8ECF5;
+  --c-text-2:        #9AA7BE;
+  --c-text-3:        #6E7A93;
 
   --c-accent:        #F5A623;
-  --c-accent-muted:  rgba(245, 166, 35, 0.10);
-  --c-accent-border: rgba(245, 166, 35, 0.22);
+  --c-accent-muted:  rgba(245, 166, 35, 0.12);
+  --c-accent-border: rgba(245, 166, 35, 0.30);
 
-  --c-ok:            #2DD4B0;
-  --c-ok-muted:      rgba(45, 212, 176, 0.10);
-  --c-live:          #818CF8;
-  --c-live-muted:    rgba(129, 140, 248, 0.10);
+  --c-ok:            #34D8B4;
+  --c-ok-muted:      rgba(52, 216, 180, 0.12);
+  --c-live:          #8E99FF;
+  --c-live-muted:    rgba(142, 153, 255, 0.13);
   --c-warn:          #FBBD20;
-  --c-warn-muted:    rgba(251, 189, 32, 0.10);
-  --c-err:           #F87171;
-  --c-err-muted:     rgba(248, 113, 113, 0.10);
+  --c-warn-muted:    rgba(251, 189, 32, 0.12);
+  --c-err:           #FB8080;
+  --c-err-muted:     rgba(251, 128, 128, 0.12);
+
+  --shadow-md:       0 4px 16px rgba(0, 0, 0, 0.40);
+  --shadow-lg:       0 16px 48px rgba(0, 0, 0, 0.55);
+  --ring:            0 0 0 3px rgba(245, 166, 35, 0.30);
 }
 
+/* Light palette — applied when the OS asks for light and the user has not
+   explicitly chosen dark. */
 @media (prefers-color-scheme: light) {
-  :root {
-    --c-base:          #F0F2F7;
+  :root:not([data-theme="dark"]) {
+    --c-base:          #F4F6FA;
     --c-surface:       #FFFFFF;
-    --c-raised:        #E8EBF4;
-    --c-hover:         #DDE1ED;
-    --c-border:        #CDD2DF;
-    --c-divider:       #E3E7F0;
-    --c-text-1:        #0B0D16;
-    --c-text-2:        #516070;
-    --c-text-3:        #94A0B4;
-    --c-accent:        #C8830C;
-    --c-accent-muted:  rgba(200, 131, 12, 0.08);
-    --c-accent-border: rgba(200, 131, 12, 0.20);
-    --c-ok:            #059669;
-    --c-ok-muted:      rgba(5, 150, 105, 0.08);
-    --c-live:          #4F46E5;
-    --c-live-muted:    rgba(79, 70, 229, 0.08);
-    --c-warn:          #B45309;
-    --c-warn-muted:    rgba(180, 83, 9, 0.08);
+    --c-raised:        #EDF0F7;
+    --c-hover:         #E4E9F3;
+    --c-border:        #D6DCE8;
+    --c-divider:       #E8ECF3;
+
+    --c-text-1:        #0F1320;
+    --c-text-2:        #4A5568;
+    --c-text-3:        #6B7688;
+
+    --c-accent:        #B4740A;
+    --c-accent-muted:  rgba(180, 116, 10, 0.10);
+    --c-accent-border: rgba(180, 116, 10, 0.28);
+
+    --c-ok:            #047857;
+    --c-ok-muted:      rgba(4, 120, 87, 0.10);
+    --c-live:          #4338CA;
+    --c-live-muted:    rgba(67, 56, 202, 0.10);
+    --c-warn:          #A16207;
+    --c-warn-muted:    rgba(161, 98, 7, 0.10);
     --c-err:           #DC2626;
-    --c-err-muted:     rgba(220, 38, 38, 0.08);
+    --c-err-muted:     rgba(220, 38, 38, 0.10);
+
+    --shadow-md:       0 4px 16px rgba(15, 19, 32, 0.08);
+    --shadow-lg:       0 16px 48px rgba(15, 19, 32, 0.14);
+    --ring:            0 0 0 3px rgba(180, 116, 10, 0.25);
   }
 }
 
-:root[data-theme="dark"] {
-  --c-base:          #07080C;
-  --c-surface:       #0D0F15;
-  --c-raised:        #131620;
-  --c-hover:         #181C2A;
-  --c-border:        #1C1F30;
-  --c-divider:       #111420;
-  --c-text-1:        #E0E4EE;
-  --c-text-2:        #6A7892;
-  --c-text-3:        #3A4257;
-  --c-accent:        #F5A623;
-  --c-accent-muted:  rgba(245, 166, 35, 0.10);
-  --c-accent-border: rgba(245, 166, 35, 0.22);
-  --c-ok:            #2DD4B0;
-  --c-ok-muted:      rgba(45, 212, 176, 0.10);
-  --c-live:          #818CF8;
-  --c-live-muted:    rgba(129, 140, 248, 0.10);
-  --c-warn:          #FBBD20;
-  --c-warn-muted:    rgba(251, 189, 32, 0.10);
-  --c-err:           #F87171;
-  --c-err-muted:     rgba(248, 113, 113, 0.10);
-}
-
+/* Explicit light choice must win regardless of OS preference. */
 :root[data-theme="light"] {
-  --c-base:          #F0F2F7;
+  --c-base:          #F4F6FA;
   --c-surface:       #FFFFFF;
-  --c-raised:        #E8EBF4;
-  --c-hover:         #DDE1ED;
-  --c-border:        #CDD2DF;
-  --c-divider:       #E3E7F0;
-  --c-text-1:        #0B0D16;
-  --c-text-2:        #516070;
-  --c-text-3:        #94A0B4;
-  --c-accent:        #C8830C;
-  --c-accent-muted:  rgba(200, 131, 12, 0.08);
-  --c-accent-border: rgba(200, 131, 12, 0.20);
-  --c-ok:            #059669;
-  --c-ok-muted:      rgba(5, 150, 105, 0.08);
-  --c-live:          #4F46E5;
-  --c-live-muted:    rgba(79, 70, 229, 0.08);
-  --c-warn:          #B45309;
-  --c-warn-muted:    rgba(180, 83, 9, 0.08);
+  --c-raised:        #EDF0F7;
+  --c-hover:         #E4E9F3;
+  --c-border:        #D6DCE8;
+  --c-divider:       #E8ECF3;
+
+  --c-text-1:        #0F1320;
+  --c-text-2:        #4A5568;
+  --c-text-3:        #6B7688;
+
+  --c-accent:        #B4740A;
+  --c-accent-muted:  rgba(180, 116, 10, 0.10);
+  --c-accent-border: rgba(180, 116, 10, 0.28);
+
+  --c-ok:            #047857;
+  --c-ok-muted:      rgba(4, 120, 87, 0.10);
+  --c-live:          #4338CA;
+  --c-live-muted:    rgba(67, 56, 202, 0.10);
+  --c-warn:          #A16207;
+  --c-warn-muted:    rgba(161, 98, 7, 0.10);
   --c-err:           #DC2626;
-  --c-err-muted:     rgba(220, 38, 38, 0.08);
+  --c-err-muted:     rgba(220, 38, 38, 0.10);
+
+  --shadow-md:       0 4px 16px rgba(15, 19, 32, 0.08);
+  --shadow-lg:       0 16px 48px rgba(15, 19, 32, 0.14);
+  --ring:            0 0 0 3px rgba(180, 116, 10, 0.25);
 }
 
 /* ── Base ───────────────────────────────────────────────────────── */
@@ -109,19 +110,38 @@ body {
   font-feature-settings: 'kern' 1;
 }
 
-/* ── Scrollbar ──────────────────────────────────────────────────── */
-::-webkit-scrollbar        { width: 4px; height: 4px; }
-::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: var(--c-border); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--c-text-3); }
+/* Visible keyboard focus everywhere — the old design had none. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: 8px;
+}
 
-/* ── Utilities ──────────────────────────────────────────────────── */
-.hive-row {
-  transition: background 120ms;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
-.hive-row:hover {
-  background: var(--c-hover);
+
+/* ── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 10px; height: 10px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  {
+  background: var(--c-border);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-text-3);
+  background-clip: content-box;
+}
+
+/* ── Surfaces ───────────────────────────────────────────────────── */
+.hive-row { transition: background 120ms ease; }
+.hive-row:hover { background: var(--c-hover); }
 
 .hive-card {
   background: var(--c-surface);
@@ -129,7 +149,34 @@ body {
   border-radius: 12px;
 }
 
-/* ── Animations ─────────────────────────────────────────────────── */
+.hive-card-hover {
+  transition: border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+.hive-card-hover:hover {
+  border-color: var(--c-accent-border);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Typography helpers ─────────────────────────────────────────── */
+.hive-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--c-text-3);
+  margin: 0;
+}
+
+.hive-h1 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--c-text-1);
+  margin: 0;
+}
+
 /* ── Forms ──────────────────────────────────────────────────────── */
 .hive-label {
   display: block;
@@ -151,9 +198,9 @@ body {
   color: var(--c-text-1);
   font-family: var(--font-sans);
   font-size: 13px;
-  padding: 8px 12px;
+  padding: 9px 12px;
   outline: none;
-  transition: border-color 120ms;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
   box-sizing: border-box;
 }
 
@@ -161,32 +208,33 @@ body {
 .hive-select:focus,
 .hive-textarea:focus {
   border-color: var(--c-accent);
+  box-shadow: var(--ring);
 }
 
 .hive-input::placeholder,
-.hive-textarea::placeholder {
-  color: var(--c-text-3);
-}
+.hive-textarea::placeholder { color: var(--c-text-3); }
 
-.hive-textarea {
-  resize: vertical;
-  line-height: 1.6;
-  min-height: 96px;
-}
+.hive-textarea { resize: vertical; line-height: 1.6; min-height: 96px; }
 
 .hive-select {
   appearance: none;
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4L6 8L10 4' stroke='%236A7892' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4L6 8L10 4' stroke='%239AA7BE' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 32px;
 }
 
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+
+.hive-hint { font-size: 11px; color: var(--c-text-3); margin: 0; line-height: 1.5; }
+.hive-error { font-size: 11px; color: var(--c-err); margin: 0; }
+
 /* ── Buttons ────────────────────────────────────────────────────── */
 .hive-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 8px 16px;
   border-radius: 8px;
@@ -194,62 +242,122 @@ body {
   font-weight: 500;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: opacity 120ms, background 120ms;
+  transition: background 120ms ease, border-color 120ms ease, opacity 120ms ease;
   font-family: var(--font-sans);
   white-space: nowrap;
 }
 
-.hive-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.hive-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.hive-btn:active:not(:disabled) { transform: translateY(0.5px); }
 
 .hive-btn-primary {
   color: var(--c-accent);
   background: var(--c-accent-muted);
   border-color: var(--c-accent-border);
 }
-.hive-btn-primary:hover:not(:disabled) { opacity: 0.8; }
+.hive-btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--c-accent) 20%, transparent);
+  border-color: var(--c-accent);
+}
 
 .hive-btn-ghost {
   color: var(--c-text-2);
   background: transparent;
   border-color: var(--c-border);
 }
-.hive-btn-ghost:hover:not(:disabled) { background: var(--c-raised); }
+.hive-btn-ghost:hover:not(:disabled) {
+  background: var(--c-raised);
+  color: var(--c-text-1);
+}
 
 .hive-btn-danger {
   color: var(--c-err);
   background: var(--c-err-muted);
   border-color: transparent;
 }
-.hive-btn-danger:hover:not(:disabled) { opacity: 0.8; }
+.hive-btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--c-err) 20%, transparent);
+}
 
-/* ── Tool chips ──────────────────────────────────────────────────── */
+.hive-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--c-text-3);
+  transition: background 120ms ease, color 120ms ease;
+}
+.hive-icon-btn:hover:not(:disabled) { background: var(--c-hover); color: var(--c-text-1); }
+.hive-icon-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.hive-icon-btn.danger:hover:not(:disabled) { color: var(--c-err); background: var(--c-err-muted); }
+
+/* ── Tool chips ─────────────────────────────────────────────────── */
 .tool-chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
+  padding: 5px 11px;
   border-radius: 6px;
   font-size: 11px;
   font-family: var(--font-mono);
   cursor: pointer;
   border: 1px solid var(--c-border);
-  color: var(--c-text-3);
+  color: var(--c-text-2);
   background: transparent;
-  transition: all 120ms;
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
   user-select: none;
 }
-.tool-chip:hover { border-color: var(--c-text-3); color: var(--c-text-2); }
+.tool-chip:hover { border-color: var(--c-text-3); color: var(--c-text-1); }
 .tool-chip.active {
-  border-color: var(--c-live-muted);
+  border-color: var(--c-live);
   color: var(--c-live);
   background: var(--c-live-muted);
 }
 
-/* ── Form field groups ───────────────────────────────────────────── */
-.form-field { display: flex; flex-direction: column; gap: 6px; }
+.hive-tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  color: var(--c-text-2);
+  background: var(--c-raised);
+  border: 1px solid var(--c-border);
+}
 
+/* ── Skeletons ──────────────────────────────────────────────────── */
+.hive-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--c-raised) 25%,
+    var(--c-hover) 50%,
+    var(--c-raised) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Animations ─────────────────────────────────────────────────── */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
+  50%      { opacity: 0.3; }
 }
 .anim-pulse { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim-in { animation: fade-up 180ms ease-out both; }

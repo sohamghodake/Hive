@@ -99,10 +99,10 @@ export const AVAILABLE_TOOLS = [
 ] as const;
 
 export const MODELS = [
-  { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B (default)" },
-  { id: "llama-3.1-8b-instant",    label: "Llama 3.1 8B (fast)" },
-  { id: "gemma2-9b-it",            label: "Gemma 2 9B" },
-  { id: "mixtral-8x7b-32768",      label: "Mixtral 8x7B" },
+  { id: "openai/gpt-oss-120b", label: "GPT OSS 120B (default, tool-use)" },
+  { id: "openai/gpt-oss-20b",  label: "GPT OSS 20B (fast, tool-use)" },
+  { id: "groq/compound",       label: "Groq Compound (no tools)" },
+  { id: "qwen/qwen3.6-27b",    label: "Qwen 3.6 27B" },
 ] as const;
 
 export const SYSTEM_PROMPT_PRESETS = [
@@ -125,6 +125,7 @@ export const SYSTEM_PROMPT_PRESETS = [
 ] as const;
 
 export const api = {
+  health: () => apiFetch<{ status: string }>("/health"),
   agents: {
     list:   ()                    => apiFetch<Agent[]>("/api/agents"),
     get:    (id: string)          => apiFetch<Agent>(`/api/agents/${id}`),

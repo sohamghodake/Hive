@@ -15,7 +15,7 @@ class Agent(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     description: Mapped[str | None] = mapped_column(Text)
     system_prompt: Mapped[str] = mapped_column(Text, nullable=False)
-    model: Mapped[str] = mapped_column(String(100), default="kimi-k2.7-code:cloud")
+    model: Mapped[str] = mapped_column(String(100), default="openai/gpt-oss-120b")
     tools: Mapped[list] = mapped_column(JSONB, default=list)
     config: Mapped[dict] = mapped_column(JSONB, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -1,4 +1,5 @@
 import os
+import re
 
 import asyncpg
 from fastapi import FastAPI, HTTPException
@@ -8,13 +9,30 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").replace("+asyncpg", "")
 
 app = FastAPI(title="mcp-db")
 
-_BLOCKED = {"drop", "truncate", "delete", "insert", "update", "alter", "create", "grant", "revoke"}
+_BLOCKED = {
+    "drop", "truncate", "delete", "insert", "update", "alter", "create",
+    "grant", "revoke", "copy", "call", "do", "merge", "vacuum", "refresh",
+}
 
 
 def _check_readonly(sql: str) -> None:
-    first = sql.strip().split()[0].lower()
-    if first in _BLOCKED:
-        raise HTTPException(400, f"Write operation not permitted: {first.upper()}")
+    """Reject anything that is not a plain read.
+
+    Checking only the leading keyword is not enough: `WITH t AS (...) DELETE ...`
+    starts with WITH, and a trailing `; DROP ...` hides behind a valid SELECT.
+    """
+    stripped = re.sub(r"--[^\n]*|/\*.*?\*/", " ", sql, flags=re.DOTALL)
+
+    if ";" in stripped.rstrip().rstrip(";"):
+        raise HTTPException(400, "Multiple statements are not permitted")
+
+    first = stripped.strip().split()[0].lower() if stripped.strip() else ""
+    if first not in {"select", "with", "show", "explain", "table"}:
+        raise HTTPException(400, f"Only read queries are permitted, got: {first.upper()}")
+
+    for word in re.findall(r"\b[a-z]+\b", stripped.lower()):
+        if word in _BLOCKED:
+            raise HTTPException(400, f"Write operation not permitted: {word.upper()}")
 
 
 class Params(BaseModel):

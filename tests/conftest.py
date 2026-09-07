@@ -1,4 +1,5 @@
-import pytest
+import os
+
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -7,24 +8,37 @@ from api.main import app
 from api.dependencies import get_db
 from db.base import Base
 
-TEST_DB_URL = "postgresql+asyncpg://hive:hivepass@localhost:5432/hive_test"
-
-engine = create_async_engine(TEST_DB_URL)
-_session_factory = async_sessionmaker(engine, expire_on_commit=False)
-
-
-@pytest_asyncio.fixture(autouse=True, scope="session")
-async def create_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+# Overridable so the suite can run either on the host or inside the api container,
+# where the database is reachable as "postgres" rather than "localhost".
+TEST_DB_URL = os.getenv(
+    "TEST_DATABASE_URL", "postgresql+asyncpg://hive:hivepass@localhost:5432/hive_test"
+)
 
 
 @pytest_asyncio.fixture
-async def db_session():
-    async with _session_factory() as session:
+async def engine():
+    """Built per test.
+
+    asyncpg connections are bound to the event loop that opened them, and
+    pytest-asyncio runs each test in a fresh loop. A module-level engine
+    therefore hands out connections belonging to a dead loop, which surfaces as
+    "another operation is in progress" rather than anything obviously loop-related.
+    """
+    eng = create_async_engine(TEST_DB_URL)
+    async with eng.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    try:
+        yield eng
+    finally:
+        async with eng.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+        await eng.dispose()
+
+
+@pytest_asyncio.fixture
+async def db_session(engine) -> AsyncSession:
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    async with factory() as session:
         yield session
         await session.rollback()
 

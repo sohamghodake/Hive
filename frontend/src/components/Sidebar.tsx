@@ -1,6 +1,36 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { ThemeToggle } from "./ThemeToggle";
+
+/** Small heartbeat so a dead backend is obvious instead of surfacing as
+    every page silently rendering empty. */
+function ApiStatus() {
+  const { isSuccess, isError } = useQuery({
+    queryKey: ["health"],
+    queryFn: api.health,
+    refetchInterval: 15000,
+    retry: false,
+  });
+
+  const color = isSuccess ? "var(--c-ok)" : isError ? "var(--c-err)" : "var(--c-text-3)";
+  const label = isSuccess ? "API online" : isError ? "API offline" : "Connecting…";
+
+  return (
+    <span
+      title={label}
+      style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: "var(--font-mono)", fontSize: 10, color }}
+    >
+      <span
+        className={isError ? "anim-pulse" : ""}
+        style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }}
+      />
+      {isSuccess ? "online" : isError ? "offline" : "…"}
+    </span>
+  );
+}
 
 function HiveHex() {
   return (
@@ -190,20 +220,21 @@ export function Sidebar() {
       {/* Footer */}
       <div
         style={{
-          padding: "12px 20px",
+          padding: "12px",
           borderTop: "1px solid var(--c-border)",
           flexShrink: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
         }}
       >
-        <p
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            color: "var(--c-text-3)",
-          }}
-        >
-          v0.1.0-alpha
-        </p>
+        <ThemeToggle />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--c-text-3)" }}>
+            v0.1.0
+          </span>
+          <ApiStatus />
+        </div>
       </div>
     </aside>
   );

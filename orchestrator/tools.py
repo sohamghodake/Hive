@@ -88,3 +88,16 @@ async def read_document(document_id: str) -> str:
 
 ALL_TOOLS = [read_file, write_file, list_files, query_database, web_search, http_get, list_documents, read_document]
 TOOL_MAP = {t.name: t for t in ALL_TOOLS}
+
+# Which MCP server backs each tool, recorded on every tool call so a run's trace
+# shows where the work actually happened.
+TOOL_SERVERS = {
+    "read_file": "mcp-file",
+    "write_file": "mcp-file",
+    "list_files": "mcp-file",
+    "query_database": "mcp-db",
+    "list_documents": "mcp-db",
+    "read_document": "mcp-db",
+    "web_search": "mcp-search",
+    "http_get": "mcp-api",
+}

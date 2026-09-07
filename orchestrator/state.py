@@ -13,3 +13,8 @@ class AgentState(TypedDict):
     tool_results: list[dict]
     final_output: dict | None
     error: str | None
+
+    # Per-agent configuration, resolved from the Agent row at run start.
+    model: str
+    tool_names: list[str]
+    max_steps: int

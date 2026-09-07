@@ -6,12 +6,13 @@ import { api, type Agent, type AgentCreate, AVAILABLE_TOOLS, MODELS, SYSTEM_PROM
 import { formatDate } from "@/lib/utils";
 import { Modal } from "@/components/Modal";
 import { useToast } from "@/components/Toast";
+import { EmptyState, ErrorState, PageHeader, Skeleton } from "@/components/ui";
 
 const EMPTY_FORM: AgentCreate = {
   name: "",
   description: "",
   system_prompt: "",
-  model: "llama-3.3-70b-versatile",
+  model: "openai/gpt-oss-120b",
   tools: ["read_file", "web_search"],
 };
 
@@ -133,6 +134,7 @@ function AgentFormModal({ open, onClose }: { open: boolean; onClose: () => void 
                 key={t.id}
                 type="button"
                 title={t.desc}
+                aria-pressed={form.tools.includes(t.id)}
                 className={`tool-chip ${form.tools.includes(t.id) ? "active" : ""}`}
                 onClick={() => toggleTool(t.id)}
               >
@@ -140,6 +142,11 @@ function AgentFormModal({ open, onClose }: { open: boolean; onClose: () => void 
               </button>
             ))}
           </div>
+          <p className="hive-hint">
+            {form.tools.length === 0
+              ? "No tools selected — this agent can only answer from the model's own knowledge."
+              : "The agent can call only these tools; anything else is refused at run time."}
+          </p>
         </div>
 
         {/* Actions */}
@@ -262,7 +269,9 @@ function DeleteConfirm({
 export default function AgentsPage() {
   const qc = useQueryClient();
   const { show } = useToast();
-  const { data: agents = [], isLoading } = useQuery({ queryKey: ["agents"], queryFn: api.agents.list });
+  const agentsQ = useQuery({ queryKey: ["agents"], queryFn: api.agents.list });
+  const agents = agentsQ.data ?? [];
+  const isLoading = agentsQ.isLoading;
 
   const [createOpen, setCreateOpen] = useState(false);
   const [runAgentId, setRunAgentId] = useState<string | null>(null);
@@ -287,32 +296,55 @@ export default function AgentsPage() {
   }
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 40px" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 28 }}>
-        <div>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.09em", color: "var(--c-text-3)", margin: "0 0 4px 0" }}>
-            Platform
-          </p>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, color: "var(--c-text-1)", margin: 0 }}>
-            Agents
-          </h1>
-        </div>
-        <button className="hive-btn hive-btn-primary" onClick={() => setCreateOpen(true)}>
-          <PlusIcon /> New Agent
-        </button>
-      </div>
-
-      {isLoading && <p style={{ fontSize: 13, color: "var(--c-text-3)" }}>Loading…</p>}
-
-      {!isLoading && agents.length === 0 && (
-        <div className="hive-card" style={{ padding: "48px 24px", textAlign: "center" }}>
-          <p style={{ fontSize: 22, margin: "0 0 8px 0" }}>🤖</p>
-          <p style={{ fontSize: 14, fontWeight: 500, color: "var(--c-text-1)", margin: "0 0 6px 0" }}>No agents yet</p>
-          <p style={{ fontSize: 13, color: "var(--c-text-3)", margin: "0 0 20px 0" }}>Create an agent to start running tasks.</p>
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 40px 64px" }}>
+      <PageHeader
+        eyebrow="Platform"
+        title="Agents"
+        subtitle="Each agent pairs a system prompt with a model and a fixed set of tools."
+        actions={
           <button className="hive-btn hive-btn-primary" onClick={() => setCreateOpen(true)}>
-            <PlusIcon /> Create your first agent
+            <PlusIcon /> New Agent
           </button>
+        }
+      />
+
+      {agentsQ.isError && (
+        <div style={{ marginBottom: 20 }}>
+          <ErrorState error={agentsQ.error} onRetry={() => agentsQ.refetch()} />
+        </div>
+      )}
+
+      {isLoading && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="hive-card" style={{ padding: "20px 24px" }}>
+              <Skeleton width={180} height={16} />
+              <div style={{ height: 10 }} />
+              <Skeleton width="60%" height={12} />
+              <div style={{ height: 14 }} />
+              <Skeleton height={38} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isLoading && agents.length === 0 && !agentsQ.isError && (
+        <div className="hive-card">
+          <EmptyState
+            icon={
+              <svg width="20" height="20" viewBox="0 0 15 15" fill="none" aria-hidden>
+                <circle cx="7.5" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.3" />
+                <path d="M1.5 14C1.5 11.5 4.5 9.5 7.5 9.5C10.5 9.5 13.5 11.5 13.5 14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+            }
+            title="No agents yet"
+            description="An agent is a system prompt plus the tools it is allowed to call. Create one to start running tasks."
+            action={
+              <button className="hive-btn hive-btn-primary" onClick={() => setCreateOpen(true)}>
+                <PlusIcon /> Create your first agent
+              </button>
+            }
+          />
         </div>
       )}
 
@@ -368,21 +400,27 @@ export default function AgentsPage() {
             {/* Footer: tools + actions */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
               <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                {agent.tools.map((t) => (
-                  <span
-                    key={t}
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 10,
-                      padding: "2px 8px",
-                      borderRadius: 4,
-                      color: "var(--c-live)",
-                      background: "var(--c-live-muted)",
-                    }}
-                  >
-                    {t}
+                {agent.tools.length === 0 ? (
+                  <span style={{ fontSize: 11, color: "var(--c-text-3)", fontStyle: "italic" }}>
+                    no tools — model knowledge only
                   </span>
-                ))}
+                ) : (
+                  agent.tools.map((t) => (
+                    <span
+                      key={t}
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: 10,
+                        padding: "3px 8px",
+                        borderRadius: 4,
+                        color: "var(--c-live)",
+                        background: "var(--c-live-muted)",
+                      }}
+                    >
+                      {t}
+                    </span>
+                  ))
+                )}
               </div>
               <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-text-3)", alignSelf: "center", marginRight: 4 }}>

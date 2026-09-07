@@ -28,14 +28,20 @@ class FileEntry(BaseModel):
     size: int | None = None
 
 
-@router.get("/files")
-async def list_files(directory: str = "") -> list[dict]:
+@router.get("/files", response_model=list[FileEntry])
+async def list_files(directory: str = "") -> list[FileEntry]:
     result = await _mcp("list_files", {"directory": directory})
-    files = result.get("files", [])
-    # Enrich with minimal metadata
     entries = []
-    for f in sorted(files):
-        entries.append({"name": f.split("/")[-1], "path": f, "is_dir": False})
+    for f in sorted(result.get("files", [])):
+        # mcp-file returns bare paths; read each once to report a real size so
+        # the UI is not left rendering "—" for every row.
+        size: int | None = None
+        try:
+            content = await _mcp("read_file", {"path": f})
+            size = len(content.get("content", "").encode("utf-8"))
+        except HTTPException:
+            pass
+        entries.append(FileEntry(name=f.split("/")[-1], path=f, is_dir=False, size=size))
     return entries
 
 

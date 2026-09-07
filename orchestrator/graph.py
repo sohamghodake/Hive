@@ -57,6 +57,14 @@ async def run_agent(run_id: str) -> None:
                 or str(run.input)
             )
 
+            # Resolve per-agent execution config. Falling back to the env model
+            # keeps agent-less runs working.
+            model = (agent.model if agent and agent.model else None) or os.getenv(
+                "LLM_MODEL", "openai/gpt-oss-120b"
+            )
+            tool_names = list(agent.tools) if agent and agent.tools else []
+            max_steps = int((agent.config or {}).get("max_steps", 8)) if agent else 8
+
             run.status = "running"
             run.started_at = datetime.now(timezone.utc)
             await db.commit()
@@ -72,9 +80,15 @@ async def run_agent(run_id: str) -> None:
             "tool_results": [],
             "final_output": None,
             "error": None,
+            "model": model,
+            "tool_names": tool_names,
+            "max_steps": max_steps,
         }
 
-        final_state: AgentState = await _graph.ainvoke(initial)
+        # Each iteration runs think→act (2 nodes); leave room for finalize.
+        final_state: AgentState = await _graph.ainvoke(
+            initial, {"recursion_limit": max_steps * 2 + 4}
+        )
 
         async with factory() as db:
             run = await db.get(Run, uuid.UUID(run_id))
@@ -101,9 +115,11 @@ async def run_agent(run_id: str) -> None:
                     run_id=run.id,
                     step_id=step.id,
                     tool_name=tool_result["tool"],
+                    mcp_server=tool_result.get("server"),
                     input=tool_result["input"],
                     output={"result": tool_result["output"]} if not tool_result["error"] else None,
                     error=tool_result["output"] if tool_result["error"] else None,
+                    duration_ms=tool_result.get("duration_ms"),
                 ))
 
             # Final step

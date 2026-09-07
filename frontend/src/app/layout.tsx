@@ -27,9 +27,15 @@ export const metadata: Metadata = {
   description: "Multi-agent orchestration platform",
 };
 
+/* Runs before first paint so a stored theme never flashes the wrong palette. */
+const THEME_INIT = `(function(){try{var t=localStorage.getItem('hive-theme');if(t&&t!=='system')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+      </head>
       <body
         className={`${display.variable} ${sans.variable} ${mono.variable}`}
         style={{ margin: 0, padding: 0, WebkitFontSmoothing: "antialiased" }}
