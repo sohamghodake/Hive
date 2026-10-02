@@ -2,6 +2,7 @@ import os
 
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from api.main import app
@@ -26,6 +27,7 @@ async def engine():
     """
     eng = create_async_engine(TEST_DB_URL)
     async with eng.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
     try:
         yield eng

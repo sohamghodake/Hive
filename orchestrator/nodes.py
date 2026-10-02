@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import random
+import re
 import time
 from datetime import datetime, timezone
 
@@ -18,16 +19,35 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
 
-# Groq's free tier allows 8000 tokens/minute. `max_tokens` is *reserved* against
-# that budget on every call, so a large value fails the request outright rather
-# than merely capping the reply. Keep headroom for the prompt.
-MAX_OUTPUT_TOKENS = int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "1536"))
+# Groq's free tier allows 8000 tokens/minute, and `max_tokens` is *reserved*
+# against that budget on every call: prompt + max_tokens must fit, or the request
+# fails with 413 before the model runs. A fixed max_tokens is wrong both ways —
+# too high and long conversations 413, too low and answers are cut off (gpt-oss
+# spends part of it on hidden reasoning). So each call asks for whatever the
+# budget has left after the prompt, between a floor and a cap.
+TPM_BUDGET = int(os.getenv("LLM_TPM_BUDGET", "8000"))
+MAX_OUTPUT_TOKENS = int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "4096"))
+MIN_OUTPUT_TOKENS = 512
+REASONING_EFFORT = os.getenv("LLM_REASONING_EFFORT", "low")
 
 # Tool results are appended verbatim to the message history and re-sent on every
 # subsequent `think`. Unbounded output blows the token budget within two turns.
-MAX_TOOL_CHARS = int(os.getenv("MAX_TOOL_OUTPUT_CHARS", "4000"))
+MAX_TOOL_CHARS = int(os.getenv("MAX_TOOL_OUTPUT_CHARS", "6000"))
 
-MAX_LLM_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "4"))
+MAX_LLM_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "6"))
+MAX_RETRY_WAIT = 65.0  # the TPM window is one minute; never wait longer than that
+
+# Groq states the wait it wants in the error text: "Please try again in 7.52s"
+# or "in 1m2.5s". Honouring it beats guessing with exponential backoff, which
+# gave up after ~15s while the per-minute window needed up to 60s to clear.
+_RETRY_AFTER = re.compile(r"try again in (?:(\d+)m)?([\d.]+)s", re.IGNORECASE)
+
+
+def _suggested_wait(exc: Exception) -> float | None:
+    m = _RETRY_AFTER.search(str(exc))
+    if not m:
+        return None
+    return int(m.group(1) or 0) * 60 + float(m.group(2))
 
 # Cache one bound client per (model, tools) combination.
 _llm_cache: dict[tuple[str, tuple[str, ...]], object] = {}
@@ -36,10 +56,17 @@ _llm_cache: dict[tuple[str, tuple[str, ...]], object] = {}
 def _get_llm(model: str, tool_names: tuple[str, ...]):
     key = (model, tool_names)
     if key not in _llm_cache:
+        extra = {}
+        # gpt-oss reasons before answering, and those tokens come out of the
+        # same max_tokens. "low" keeps tool-calling quality while leaving room
+        # for the visible answer. Other models reject the parameter.
+        if model.startswith("openai/gpt-oss") and REASONING_EFFORT:
+            extra["reasoning_effort"] = REASONING_EFFORT
         client = ChatGroq(
             model=model,
             api_key=os.getenv("LLM_API_KEY", ""),
             max_tokens=MAX_OUTPUT_TOKENS,
+            **extra,
         )
         # Bind only the tools this agent is configured for. Binding the full
         # registry would let any agent call any tool regardless of its config.
@@ -81,13 +108,30 @@ async def _invoke_with_retry(llm, messages):
                 ) from exc
             if not _is_rate_limit(exc) or attempt == MAX_LLM_RETRIES - 1:
                 raise
-            delay = min(2**attempt, 20) + random.uniform(0, 1)
+            delay = min(_suggested_wait(exc) or 2**attempt, MAX_RETRY_WAIT) + random.uniform(0.2, 1.0)
             logger.warning(
                 "rate limited, retrying in %.1fs (attempt %d/%d)",
                 delay, attempt + 1, MAX_LLM_RETRIES,
             )
             await asyncio.sleep(delay)
     raise last_exc  # pragma: no cover - loop always returns or raises
+
+
+def _output_budget(messages, n_tools: int) -> int:
+    """Output tokens to request so prompt + output stays inside the TPM budget.
+
+    The prompt size is estimated (≈3.5 chars/token for English and JSON, plus a
+    per-tool allowance for the schemas sent with every call) rather than run
+    through a tokenizer: the estimate only needs to be conservative, and the
+    floor guarantees a usable answer even when it is not.
+    """
+    chars = 0
+    for m in messages:
+        chars += len(str(m.content))
+        for tc in getattr(m, "tool_calls", None) or []:
+            chars += len(json.dumps(tc.get("args", {}))) + 40
+    prompt_tokens = int(chars / 3.5) + 120 * n_tools + 200
+    return max(MIN_OUTPUT_TOKENS, min(MAX_OUTPUT_TOKENS, TPM_BUDGET - prompt_tokens - 300))
 
 
 async def think(state: AgentState) -> AgentState:
@@ -98,7 +142,8 @@ async def think(state: AgentState) -> AgentState:
         state.get("model") or DEFAULT_MODEL,
         tuple(state.get("tool_names") or ()),
     )
-    response: AIMessage = await _invoke_with_retry(llm, state["messages"])
+    budget = _output_budget(state["messages"], len(state.get("tool_names") or ()))
+    response: AIMessage = await _invoke_with_retry(llm.bind(max_tokens=budget), state["messages"])
     return {
         **state,
         "messages": [response],
@@ -107,9 +152,21 @@ async def think(state: AgentState) -> AgentState:
 
 
 def _truncate(text: str) -> str:
+    """Cap tool output, cutting at a line boundary with an explicit marker.
+
+    A raw character cut once sliced a diff mid-identifier ("sub_ctx" → "sub_"),
+    and the model then reported the fragment as an undefined variable. Ending on
+    a whole line and saying plainly that content is missing prevents that.
+    """
     if len(text) <= MAX_TOOL_CHARS:
         return text
-    return text[:MAX_TOOL_CHARS] + f"\n…[truncated {len(text) - MAX_TOOL_CHARS} chars]"
+    cut = text.rfind("\n", int(MAX_TOOL_CHARS * 0.75), MAX_TOOL_CHARS)
+    cut = cut if cut != -1 else MAX_TOOL_CHARS
+    return (
+        text[:cut]
+        + f"\n\n[TOOL OUTPUT TRUNCATED: {len(text) - cut} more characters were not shown. "
+        "The text above ends at a cut point, not at the real end of the content.]"
+    )
 
 
 async def act(state: AgentState) -> AgentState:
@@ -158,11 +215,49 @@ async def act(state: AgentState) -> AgentState:
     return {**state, "messages": new_messages, "tool_results": tool_results}
 
 
+_JSON_BLOCK = re.compile(r"```json\s*(.*?)\s*```", re.DOTALL | re.IGNORECASE)
+
+
+def _extract_structured(text: str):
+    """Parse the last ```json block in the answer, if any.
+
+    Agents whose prompts ask for structured findings end with such a block; it
+    is stored as output.data (JSONB) so results can be queried in SQL, not just
+    read. Malformed JSON is ignored rather than failing an otherwise good run.
+    """
+    blocks = _JSON_BLOCK.findall(text)
+    if not blocks:
+        return None
+    try:
+        return json.loads(blocks[-1])
+    except json.JSONDecodeError:
+        return None
+
+
 async def finalize(state: AgentState) -> AgentState:
+    # If the last message still requests tools, the step budget cut the run off.
+    last = state["messages"][-1]
+    stopped_early = isinstance(last, AIMessage) and bool(last.tool_calls)
+
+    text = "No output produced."
+    cut_off = False
     for msg in reversed(state["messages"]):
         if isinstance(msg, AIMessage) and msg.content:
-            return {**state, "final_output": {"text": str(msg.content)}}
-    return {**state, "final_output": {"text": "No output produced."}}
+            text = str(msg.content)
+            # The model ran out of output tokens mid-answer: say so rather than
+            # presenting a truncated report as complete.
+            cut_off = (getattr(msg, "response_metadata", None) or {}).get("finish_reason") == "length"
+            break
+
+    output: dict = {"text": text}
+    if cut_off:
+        output["truncated"] = True
+    data = _extract_structured(text)
+    if data is not None:
+        output["data"] = data
+    if stopped_early:
+        output["stopped_early"] = True
+    return {**state, "final_output": output}
 
 
 def should_continue(state: AgentState) -> str:

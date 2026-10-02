@@ -9,7 +9,7 @@ from db.base import Base
 import api.models  # noqa: F401 — register all models
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", (settings.migration_database_url or settings.database_url))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -36,7 +36,7 @@ def do_run_migrations(connection):
 
 
 async def run_migrations_online() -> None:
-    engine = create_async_engine(settings.database_url)
+    engine = create_async_engine((settings.migration_database_url or settings.database_url))
     async with engine.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await engine.dispose()

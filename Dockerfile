@@ -15,14 +15,21 @@ RUN pip install --no-cache-dir \
     langchain-openai \
     langchain-groq \
     langgraph \
-    mcp \
-    fastmcp \
+    fastmcp==4.0.10 \
+    fastembed==0.8.1 \
+    pypdf \
     httpx \
     aiofiles \
     python-dotenv \
     python-multipart \
     pgvector \
     sse-starlette
+
+ENV FASTEMBED_CACHE_PATH=/models
+COPY rag/ ./rag/
+# Bake the embedding model into the image so document indexing works offline
+# and the first upload does not block on a ~130 MB download.
+RUN PYTHONPATH=/app python -c "from rag.embeddings import embed_passages; embed_passages(['warmup'])"
 
 COPY api/ ./api/
 COPY orchestrator/ ./orchestrator/

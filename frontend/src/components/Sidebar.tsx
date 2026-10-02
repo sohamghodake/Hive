@@ -231,7 +231,7 @@ export function Sidebar() {
         <ThemeToggle />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--c-text-3)" }}>
-            v0.1.0
+            v0.2.0
           </span>
           <ApiStatus />
         </div>

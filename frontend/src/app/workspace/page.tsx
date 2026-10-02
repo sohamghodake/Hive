@@ -125,17 +125,26 @@ export default function WorkspacePage() {
 
   const [viewing,    setViewing]    = useState<WorkspaceFile | null>(null);
   const [delTarget,  setDelTarget]  = useState<string | null>(null);
+  const [dir,        setDir]        = useState("");
 
   const { data: files = [], isLoading, refetch } = useQuery({
-    queryKey: ["workspace-files"],
-    queryFn:  () => api.workspace.list(),
+    queryKey: ["workspace-files", dir],
+    queryFn:  () => api.workspace.list(dir),
     refetchInterval: 10000,
   });
+  // Folders first, then files, each alphabetical.
+  const entries = [...files].sort((a, b) => Number(b.is_dir) - Number(a.is_dir) || a.path.localeCompare(b.path));
+  const crumbs = dir ? dir.split("/") : [];
+
+  function open(file: WorkspaceFile) {
+    if (file.is_dir) setDir(file.path);
+    else setViewing(file);
+  }
 
   const deleteFile = useMutation({
     mutationFn: (path: string) => api.workspace.delete(path),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["workspace-files"] });
+      qc.invalidateQueries({ queryKey: ["workspace-files"] });  // prefix-matches every folder
       show("File deleted", "success");
       setDelTarget(null);
     },
@@ -156,7 +165,7 @@ export default function WorkspacePage() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-text-3)" }}>
-            {files.length} {files.length === 1 ? "file" : "files"}
+            {entries.length} {entries.length === 1 ? "item" : "items"}
           </span>
           <button className="hive-btn hive-btn-ghost" onClick={() => refetch()} style={{ fontSize: 12 }}>
             Refresh
@@ -171,12 +180,31 @@ export default function WorkspacePage() {
           <path d="M7 6v4M7 4.5v.5" stroke="var(--c-accent)" strokeWidth="1.4" strokeLinecap="round"/>
         </svg>
         <span style={{ fontSize: 12, color: "var(--c-text-3)" }}>
-          Reports and files written by agents appear here. Use the{" "}
-          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-accent)", background: "var(--c-accent-muted)", padding: "1px 5px", borderRadius: 3 }}>market-researcher</code>
-          {" "}or{" "}
-          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-accent)", background: "var(--c-accent-muted)", padding: "1px 5px", borderRadius: 3 }}>file-manager</code>
-          {" "}agent to generate content.
+          Reports agents write land here — e.g.{" "}
+          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-accent)", background: "var(--c-accent-muted)", padding: "1px 5px", borderRadius: 3 }}>contract-reviewer</code>
+          {" "}and{" "}
+          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-accent)", background: "var(--c-accent-muted)", padding: "1px 5px", borderRadius: 3 }}>pr-reviewer</code>
+          {" "}write to <code style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>reviews/</code>.
         </span>
+      </div>
+
+      {/* Breadcrumb */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10, fontFamily: "var(--font-mono)", fontSize: 12 }}>
+        <button onClick={() => setDir("")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: dir ? "var(--c-accent)" : "var(--c-text-1)", fontFamily: "inherit", fontSize: "inherit" }}>
+          workspace
+        </button>
+        {crumbs.map((c, i) => {
+          const path = crumbs.slice(0, i + 1).join("/");
+          const last = i === crumbs.length - 1;
+          return (
+            <span key={path} style={{ display: "flex", gap: 6 }}>
+              <span style={{ color: "var(--c-text-3)" }}>/</span>
+              <button onClick={() => setDir(path)} disabled={last} style={{ background: "none", border: "none", padding: 0, cursor: last ? "default" : "pointer", color: last ? "var(--c-text-1)" : "var(--c-accent)", fontFamily: "inherit", fontSize: "inherit" }}>
+                {c}
+              </button>
+            </span>
+          );
+        })}
       </div>
 
       <div className="hive-card" style={{ overflow: "hidden" }}>
@@ -193,7 +221,17 @@ export default function WorkspacePage() {
           <p style={{ padding: "24px 20px", fontSize: 13, color: "var(--c-text-3)", margin: 0 }}>Loading…</p>
         )}
 
-        {files.map((file) => (
+        {dir && (
+          <button
+            className="hive-row"
+            onClick={() => setDir(crumbs.slice(0, -1).join("/"))}
+            style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 20px", border: "none", borderBottom: "1px solid var(--c-divider)", background: "transparent", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--c-text-2)" }}
+          >
+            ↑ ..
+          </button>
+        )}
+
+        {entries.map((file) => (
           <div
             key={file.path}
             className="hive-row"
@@ -201,41 +239,43 @@ export default function WorkspacePage() {
           >
             {/* Name */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-              <FileIcon />
+              {file.is_dir ? <span aria-hidden style={{ fontSize: 14 }}>📁</span> : <FileIcon />}
               <button
-                onClick={() => setViewing(file)}
+                onClick={() => open(file)}
                 style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left", minWidth: 0 }}
               >
                 <span style={{ fontSize: 13, fontWeight: 500, color: "var(--c-text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
-                  {file.path}
+                  {file.name}{file.is_dir ? "/" : ""}
                 </span>
               </button>
             </div>
 
             {/* Type tag */}
-            <FileTypeTag name={file.name} />
+            {file.is_dir ? <span className="hive-tag">folder</span> : <FileTypeTag name={file.name} />}
 
             {/* Actions */}
             <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
               <button
                 className="hive-btn hive-btn-ghost"
                 style={{ padding: "4px 10px", fontSize: 11 }}
-                onClick={() => setViewing(file)}
+                onClick={() => open(file)}
               >
-                View
+                {file.is_dir ? "Open" : "View"}
               </button>
-              <button
-                className="hive-btn hive-btn-danger"
-                style={{ padding: "4px 10px", fontSize: 11 }}
-                onClick={() => setDelTarget(file.path)}
-              >
-                Delete
-              </button>
+              {!file.is_dir && (
+                <button
+                  className="hive-btn hive-btn-danger"
+                  style={{ padding: "4px 10px", fontSize: 11 }}
+                  onClick={() => setDelTarget(file.path)}
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </div>
         ))}
 
-        {!isLoading && files.length === 0 && (
+        {!isLoading && entries.length === 0 && (
           <div style={{ padding: "48px 20px", textAlign: "center" }}>
             <p style={{ fontSize: 24, margin: "0 0 12px 0" }}>📂</p>
             <p style={{ fontSize: 14, fontWeight: 500, color: "var(--c-text-1)", margin: "0 0 6px 0" }}>Workspace is empty</p>

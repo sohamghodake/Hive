@@ -262,15 +262,29 @@ function LiveStream({ runId }: { runId: string }) {
             Waiting for the agent to emit its first step…
           </p>
         )}
-        {events.map((e, i) => (
-          <p
-            key={i}
-            className="anim-in"
-            style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--c-text-2)", margin: 0, wordBreak: "break-word" }}
-          >
-            {e}
-          </p>
-        ))}
+        {events.map((raw, i) => {
+          let line = raw;
+          try {
+            const ev = JSON.parse(raw);
+            if (ev.type === "step") {
+              const d = ev.data;
+              line = `#${d.sequence}  ${d.node}${d.tool ? ` · ${d.tool}` : ""}  ${d.status}`;
+            } else if (ev.type === "done") {
+              line = `run ${ev.status}`;
+            }
+          } catch {
+            /* show unparseable events verbatim */
+          }
+          return (
+            <p
+              key={i}
+              className="anim-in"
+              style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--c-text-2)", margin: 0, wordBreak: "break-word" }}
+            >
+              {line}
+            </p>
+          );
+        })}
       </div>
     </div>
   );
@@ -315,7 +329,11 @@ export default function RunDetailPage() {
   }
 
   const inFlight = run.status === "pending" || run.status === "running";
-  const result = outputText(run.output);
+  // When the trailing ```json block parsed into output.data, it gets its own card
+  // below, so drop it from the prose instead of showing it twice.
+  const hasData = !!run.output && "data" in run.output && run.output.data != null;
+  const fullText = outputText(run.output);
+  const result = hasData ? fullText.replace(/```json[\s\S]*?```\s*$/i, "").trim() || fullText : fullText;
   const isProse = !!run.output && typeof run.output === "object" && "text" in run.output;
 
   return (
@@ -407,6 +425,34 @@ export default function RunDetailPage() {
             </div>
           </div>
         </section>
+      )}
+
+      {run.output && "data" in run.output && run.output.data != null && (
+        <section>
+          <SectionLabel right={<CopyButton text={JSON.stringify(run.output.data, null, 2)} label="Copy JSON" />}>
+            Structured result
+          </SectionLabel>
+          <div className="hive-card" style={{ padding: 16, overflowX: "auto" }}>
+            <pre style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--c-text-2)", margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word", lineHeight: 1.6 }}>
+              {JSON.stringify(run.output.data, null, 2)}
+            </pre>
+          </div>
+          <p className="hive-hint" style={{ marginTop: 8 }}>
+            Stored as JSONB in <code>runs.output-&gt;'data'</code>, queryable in SQL.
+          </p>
+        </section>
+      )}
+
+      {run.output && "truncated" in run.output && (
+        <p className="hive-hint" style={{ color: "var(--c-warn)", margin: 0 }}>
+          The model ran out of output tokens mid-answer, so the result above is cut off.
+        </p>
+      )}
+
+      {run.output && "stopped_early" in run.output && (
+        <p className="hive-hint" style={{ color: "var(--c-warn)", margin: 0 }}>
+          This run hit its step budget before finishing, so the result may be partial.
+        </p>
       )}
 
       {inFlight && <LiveStream runId={run.id} />}

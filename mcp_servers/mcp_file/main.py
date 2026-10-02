@@ -1,60 +1,79 @@
+"""mcp-file — Model Context Protocol server for a sandboxed workspace.
+
+Speaks MCP over streamable HTTP at /mcp (initialize, tools/list, tools/call), so
+any MCP client can use it, not just Hive's orchestrator.
+"""
 import os
 from pathlib import Path
 
 import aiofiles
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastmcp import FastMCP
+from fastmcp.exceptions import ToolError
+from starlette.responses import JSONResponse
 
 WORKSPACE = Path(os.getenv("WORKSPACE_PATH", "/workspace")).resolve()
 
-app = FastAPI(title="mcp-file")
+mcp = FastMCP("mcp-file", instructions="Read, write, list and delete files in a sandboxed workspace.")
 
 
 def _safe_path(relative: str) -> Path:
     resolved = (WORKSPACE / relative).resolve()
-    if not str(resolved).startswith(str(WORKSPACE)):
-        raise HTTPException(400, f"Path escapes workspace: {relative}")
+    # Compare path components, not strings: a string prefix check accepts the
+    # sibling "/workspace_evil" because it starts with "/workspace".
+    if not resolved.is_relative_to(WORKSPACE):
+        raise ToolError(f"Path escapes workspace: {relative}")
     return resolved
 
 
-class Params(BaseModel):
-    params: dict
-
-
-@app.post("/tools/read_file")
-async def read_file(body: Params):
-    p = _safe_path(body.params["path"])
-    if not p.exists():
-        raise HTTPException(404, f"{body.params['path']} not found")
+@mcp.tool
+async def read_file(path: str) -> str:
+    """Read a text file from the workspace. `path` is relative to the workspace root."""
+    p = _safe_path(path)
+    if not p.is_file():
+        raise ToolError(f"{path} not found")
     async with aiofiles.open(p) as f:
-        return {"content": await f.read()}
+        return await f.read()
 
 
-@app.post("/tools/write_file")
-async def write_file(body: Params):
-    p = _safe_path(body.params["path"])
+@mcp.tool
+async def write_file(path: str, content: str) -> str:
+    """Create or overwrite a text file in the workspace, creating parent directories."""
+    p = _safe_path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
-    content = body.params["content"]
     async with aiofiles.open(p, "w") as f:
         await f.write(content)
-    return {"result": f"Written {len(content)} bytes to {body.params['path']}"}
+    return f"Wrote {len(content)} characters to {path}"
 
 
-@app.post("/tools/list_files")
-async def list_files(body: Params):
-    p = _safe_path(body.params.get("directory", ""))
+@mcp.tool
+async def list_files(directory: str = "") -> list[dict]:
+    """List entries in a workspace directory with their size in bytes."""
+    p = _safe_path(directory)
     if not p.is_dir():
-        raise HTTPException(400, "Not a directory")
-    return {"files": [str(c.relative_to(WORKSPACE)) for c in p.iterdir()]}
+        raise ToolError(f"Not a directory: {directory or '/'}")
+    return [
+        {
+            "path": str(c.relative_to(WORKSPACE)),
+            "is_dir": c.is_dir(),
+            "size": None if c.is_dir() else c.stat().st_size,
+        }
+        for c in sorted(p.iterdir())
+    ]
 
 
-@app.post("/tools/delete_file")
-async def delete_file(body: Params):
-    p = _safe_path(body.params["path"])
-    p.unlink(missing_ok=True)
-    return {"result": f"Deleted {body.params['path']}"}
+@mcp.tool
+async def delete_file(path: str) -> str:
+    """Delete a file from the workspace."""
+    p = _safe_path(path)
+    if not p.is_file():
+        raise ToolError(f"{path} not found")
+    p.unlink()
+    return f"Deleted {path}"
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+@mcp.custom_route("/health", methods=["GET"])
+async def health(_request):
+    return JSONResponse({"status": "ok"})
+
+
+app = mcp.http_app()

@@ -1,14 +1,11 @@
 """The mcp-db read-only guard is the only thing standing between an LLM-authored
 SQL string and the production tables, so its bypasses are worth pinning down."""
-import sys
-from pathlib import Path
-
 import pytest
-from fastapi import HTTPException
+from fastmcp.exceptions import ToolError
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "mcp_servers" / "mcp_db"))
+from tests.test_mcp._load import load_server
 
-from main import _check_readonly  # noqa: E402
+_check_readonly = load_server("mcp_db")._check_readonly
 
 
 @pytest.mark.parametrize(
@@ -39,5 +36,5 @@ def test_allows_reads(sql):
     ],
 )
 def test_blocks_writes(sql):
-    with pytest.raises(HTTPException):
+    with pytest.raises(ToolError):
         _check_readonly(sql)

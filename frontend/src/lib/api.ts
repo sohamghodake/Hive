@@ -88,14 +88,17 @@ export type Document = {
 };
 
 export const AVAILABLE_TOOLS = [
-  { id: "read_file",       label: "read_file",       desc: "Read files from workspace" },
-  { id: "write_file",      label: "write_file",      desc: "Write files to workspace" },
-  { id: "list_files",      label: "list_files",      desc: "List files in workspace" },
-  { id: "web_search",      label: "web_search",      desc: "Search the web" },
-  { id: "query_database",  label: "query_database",  desc: "Run SQL queries" },
-  { id: "http_get",        label: "http_get",        desc: "Fetch URLs via HTTP" },
-  { id: "list_documents",  label: "list_documents",  desc: "List knowledge base documents" },
-  { id: "read_document",   label: "read_document",   desc: "Read a document from knowledge base" },
+  { id: "read_file",        label: "read_file",        desc: "Read files from workspace" },
+  { id: "write_file",       label: "write_file",       desc: "Write files to workspace" },
+  { id: "list_files",       label: "list_files",       desc: "List files in workspace" },
+  { id: "web_search",       label: "web_search",       desc: "Search the web" },
+  { id: "http_get",         label: "http_get",         desc: "Fetch public URLs via HTTP" },
+  { id: "query_database",   label: "query_database",   desc: "Run read-only SQL" },
+  { id: "list_tables",      label: "list_tables",      desc: "List database tables" },
+  { id: "describe_table",   label: "describe_table",   desc: "Show a table's columns" },
+  { id: "list_documents",   label: "list_documents",   desc: "List knowledge base documents" },
+  { id: "read_document",    label: "read_document",    desc: "Read a document's text, paged" },
+  { id: "search_documents", label: "search_documents", desc: "Semantic search over documents (pgvector)" },
 ] as const;
 
 export const MODELS = [
@@ -144,6 +147,7 @@ export const api = {
   },
   documents: {
     list:       ()           => apiFetch<Document[]>("/api/documents"),
+    reindex:    (id: string) => apiFetch<{ id: string; chunks: number }>(`/api/documents/${id}/reindex`, { method: "POST" }),
     getContent: (id: string) => apiFetch<{ id: string; name: string; content: string; content_type: string }>(`/api/documents/${id}/content`),
     delete:     (id: string) => apiFetch<void>(`/api/documents/${id}`, { method: "DELETE" }),
   },

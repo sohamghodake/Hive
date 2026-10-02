@@ -1,17 +1,15 @@
+"""mcp-search — Model Context Protocol server for web search (Tavily or Brave)."""
 import os
 
 import httpx
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastmcp import FastMCP
+from fastmcp.exceptions import ToolError
+from starlette.responses import JSONResponse
 
 BRAVE_API_KEY = os.getenv("BRAVE_API_KEY", "")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
 
-app = FastAPI(title="mcp-search")
-
-
-class Params(BaseModel):
-    params: dict
+mcp = FastMCP("mcp-search", instructions="Search the web and return titled, linked snippets.")
 
 
 async def _brave(query: str, n: int) -> list[dict]:
@@ -41,19 +39,21 @@ async def _tavily(query: str, n: int) -> list[dict]:
         ]
 
 
-@app.post("/tools/search")
-async def search(body: Params):
-    query = body.params["query"]
-    n = body.params.get("num_results", 5)
+@mcp.tool
+async def web_search(query: str, num_results: int = 5) -> list[dict]:
+    """Search the web. Returns results with title, url and snippet."""
+    n = max(1, min(num_results, 10))
     if TAVILY_API_KEY:
-        results = await _tavily(query, n)
-    elif BRAVE_API_KEY:
-        results = await _brave(query, n)
-    else:
-        results = []
-    return {"results": results}
+        return await _tavily(query, n)
+    if BRAVE_API_KEY:
+        return await _brave(query, n)
+    # Previously this silently returned [], which agents read as "no results".
+    raise ToolError("Web search is not configured: set TAVILY_API_KEY or BRAVE_API_KEY.")
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+@mcp.custom_route("/health", methods=["GET"])
+async def health(_request):
+    return JSONResponse({"status": "ok", "provider": "tavily" if TAVILY_API_KEY else "brave" if BRAVE_API_KEY else None})
+
+
+app = mcp.http_app()

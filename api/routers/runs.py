@@ -8,8 +8,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from api.dependencies import DBSession
-from api.models.run import Run
+from api.models.run import Run, RunStep
 from api.schemas.run import RunCreate, RunDetail, RunOut
+from db.session import _session_factory as session_factory
 from orchestrator.graph import run_agent
 
 router = APIRouter()
@@ -65,37 +66,40 @@ async def stream_run(run_id: uuid.UUID, db=DBSession):
         raise HTTPException(404, "Run not found")
 
     async def event_generator():
-        seen_step_ids: set[str] = set()
+        last_seq = 0
         poll_interval = 0.5
-        max_polls = 300  # 2.5 min timeout
+        max_polls = 1200  # 10 min — rate-limit backoff can stretch a run
 
         for _ in range(max_polls):
+            # A fresh short session per poll. Reusing the request's session kept
+            # a transaction open for the whole stream and could serve stale ORM
+            # objects from the identity map instead of newly committed rows.
+            async with session_factory() as s:
+                status = await s.scalar(select(Run.status).where(Run.id == run_id))
+                steps = (await s.execute(
+                    select(RunStep)
+                    .where(RunStep.run_id == run_id, RunStep.sequence > last_seq)
+                    .order_by(RunStep.sequence)
+                )).scalars().all()
+
+            if status is None:  # deleted mid-stream
+                break
+
+            for step in steps:
+                last_seq = step.sequence
+                payload = json.dumps({"type": "step", "data": {
+                    "id": str(step.id),
+                    "node": step.node,
+                    "status": step.status,
+                    "sequence": step.sequence,
+                    "tool": (step.input or {}).get("tool"),
+                }})
+                yield f"data: {payload}\n\n"
+
+            if status in ("completed", "failed"):
+                yield f"data: {json.dumps({'type': 'done', 'status': status})}\n\n"
+                break
+
             await asyncio.sleep(poll_interval)
-            await db.refresh(run)
-
-            result = await db.execute(
-                select(Run)
-                .where(Run.id == run_id)
-                .options(selectinload(Run.steps))
-            )
-            fresh = result.scalar_one_or_none()
-            if not fresh:
-                break
-
-            for step in fresh.steps:
-                sid = str(step.id)
-                if sid not in seen_step_ids:
-                    seen_step_ids.add(sid)
-                    payload = json.dumps({"type": "step", "data": {
-                        "id": sid,
-                        "node": step.node,
-                        "status": step.status,
-                        "sequence": step.sequence,
-                    }})
-                    yield f"data: {payload}\n\n"
-
-            if fresh.status in ("completed", "failed"):
-                yield f"data: {json.dumps({'type': 'done', 'status': fresh.status})}\n\n"
-                break
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")

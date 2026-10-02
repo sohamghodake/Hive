@@ -102,6 +102,8 @@ export default function DocumentsPage() {
   const { data: docs = [], isLoading } = useQuery({
     queryKey: ["documents"],
     queryFn: api.documents.list,
+    // Indexing runs after upload returns; poll until every document is searchable.
+    refetchInterval: (q) => (q.state.data?.some((d) => !d.embedded) ? 2000 : false),
   });
 
   const upload = useMutation({
@@ -175,11 +177,12 @@ export default function DocumentsPage() {
           <path d="M7 6v4M7 4.5v.5" stroke="var(--c-live)" strokeWidth="1.4" strokeLinecap="round"/>
         </svg>
         <span style={{ fontSize: 12, color: "var(--c-text-3)" }}>
-          Documents are accessible to agents via the{" "}
-          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-live)", background: "var(--c-live-muted)", padding: "1px 5px", borderRadius: 3 }}>list_documents</code>
-          {" "}and{" "}
-          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-live)", background: "var(--c-live-muted)", padding: "1px 5px", borderRadius: 3 }}>read_document</code>
-          {" "}tools. Enable them when creating an agent.
+          Uploads are split into chunks and embedded locally (bge-small, pgvector) for{" "}
+          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-live)", background: "var(--c-live-muted)", padding: "1px 5px", borderRadius: 3 }}>search_documents</code>
+          . PDFs are text-extracted. Grant the tool to an agent — or use{" "}
+          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-live)", background: "var(--c-live-muted)", padding: "1px 5px", borderRadius: 3 }}>contract-reviewer</code>
+          {" "}or{" "}
+          <code style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--c-live)", background: "var(--c-live-muted)", padding: "1px 5px", borderRadius: 3 }}>knowledge-assistant</code>.
         </span>
       </div>
 
@@ -214,11 +217,17 @@ export default function DocumentsPage() {
                   {doc.name}
                 </span>
               </button>
-              {doc.embedded && (
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, padding: "1px 6px", borderRadius: 4, color: "var(--c-ok)", background: "var(--c-ok-muted)", flexShrink: 0 }}>
-                  embedded
-                </span>
-              )}
+              <span
+                title={doc.embedded ? "Chunked and embedded — searchable" : "Embedding in progress"}
+                className={doc.embedded ? "" : "anim-pulse"}
+                style={{
+                  fontFamily: "var(--font-mono)", fontSize: 10, padding: "1px 6px", borderRadius: 4, flexShrink: 0,
+                  color: doc.embedded ? "var(--c-ok)" : "var(--c-warn)",
+                  background: doc.embedded ? "var(--c-ok-muted)" : "var(--c-warn-muted)",
+                }}
+              >
+                {doc.embedded ? "indexed" : "indexing…"}
+              </span>
             </div>
 
             {/* Type */}

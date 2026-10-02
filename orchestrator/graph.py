@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
@@ -28,20 +28,11 @@ def build_graph():
 
 _graph = build_graph()
 
-_DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql+asyncpg://hive:hivepass@postgres:5432/hive"
-)
-
 
 async def run_agent(run_id: str) -> None:
-    from sqlalchemy import select
-    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-
     from api.models.agent import Agent
     from api.models.run import Run, RunStep, ToolCall
-
-    engine = create_async_engine(_DATABASE_URL)
-    factory = async_sessionmaker(engine, expire_on_commit=False)
+    from db.session import _session_factory as factory
 
     try:
         async with factory() as db:
@@ -85,54 +76,81 @@ async def run_agent(run_id: str) -> None:
             "max_steps": max_steps,
         }
 
+        # Persist each node as it completes, committing every time, so the SSE
+        # endpoint and the run page see progress while the run is still going.
+        # (Writing everything after ainvoke returned made "live" traces arrive
+        # all at once at the end.)
+        run_uuid = uuid.UUID(run_id)
+        sequence = 0
+        persisted_tools = 0
+        final_output = None
+        mark = datetime.now(timezone.utc)
+
         # Each iteration runs think→act (2 nodes); leave room for finalize.
-        final_state: AgentState = await _graph.ainvoke(
-            initial, {"recursion_limit": max_steps * 2 + 4}
-        )
+        async for chunk in _graph.astream(
+            initial, {"recursion_limit": max_steps * 2 + 4}, stream_mode="updates"
+        ):
+            now = datetime.now(timezone.utc)
+            async with factory() as db:
+                for node, update in chunk.items():
+                    if node == "think":
+                        msg = update["messages"][-1]
+                        calls = [tc["name"] for tc in getattr(msg, "tool_calls", None) or []]
+                        sequence += 1
+                        db.add(RunStep(
+                            run_id=run_uuid, sequence=sequence, node="think",
+                            status="completed",
+                            output={
+                                **({"tool_calls": calls} if calls else {"text": str(msg.content)[:500]}),
+                                # Token usage per model call makes cost auditable per step.
+                                "usage": getattr(msg, "usage_metadata", None),
+                                "finish_reason": (msg.response_metadata or {}).get("finish_reason"),
+                            },
+                            started_at=mark, finished_at=now,
+                        ))
+
+                    elif node == "act":
+                        for tr in update["tool_results"][persisted_tools:]:
+                            ended = datetime.fromisoformat(tr["ts"])
+                            started = ended - timedelta(milliseconds=tr.get("duration_ms") or 0)
+                            sequence += 1
+                            step = RunStep(
+                                run_id=run_uuid, sequence=sequence, node="act",
+                                status="failed" if tr["error"] else "completed",
+                                input={"tool": tr["tool"], "args": tr["input"]},
+                                output={"result": tr["output"]},
+                                started_at=started, finished_at=ended,
+                            )
+                            db.add(step)
+                            await db.flush()
+                            db.add(ToolCall(
+                                run_id=run_uuid,
+                                step_id=step.id,
+                                tool_name=tr["tool"],
+                                mcp_server=tr.get("server"),
+                                input=tr["input"],
+                                output=None if tr["error"] else {"result": tr["output"]},
+                                error=tr["output"] if tr["error"] else None,
+                                duration_ms=tr.get("duration_ms"),
+                            ))
+                        persisted_tools = len(update["tool_results"])
+
+                    elif node == "finalize":
+                        final_output = update["final_output"]
+                        sequence += 1
+                        db.add(RunStep(
+                            run_id=run_uuid, sequence=sequence, node="finalize",
+                            status="completed", output=final_output,
+                            started_at=mark, finished_at=now,
+                        ))
+                await db.commit()
+            mark = now
 
         async with factory() as db:
-            run = await db.get(Run, uuid.UUID(run_id))
+            run = await db.get(Run, run_uuid)
             run.status = "completed"
-            run.output = final_state["final_output"]
+            run.output = final_output
             run.finished_at = datetime.now(timezone.utc)
-
-            # Write one step per think→act cycle
-            for i, tool_result in enumerate(final_state["tool_results"]):
-                step = RunStep(
-                    run_id=run.id,
-                    sequence=i + 1,
-                    node="act",
-                    status="completed",
-                    input={"tool": tool_result["tool"], "args": tool_result["input"]},
-                    output={"result": tool_result["output"]},
-                    started_at=datetime.fromisoformat(tool_result["ts"]),
-                    finished_at=datetime.now(timezone.utc),
-                )
-                db.add(step)
-                await db.flush()
-
-                db.add(ToolCall(
-                    run_id=run.id,
-                    step_id=step.id,
-                    tool_name=tool_result["tool"],
-                    mcp_server=tool_result.get("server"),
-                    input=tool_result["input"],
-                    output={"result": tool_result["output"]} if not tool_result["error"] else None,
-                    error=tool_result["output"] if tool_result["error"] else None,
-                    duration_ms=tool_result.get("duration_ms"),
-                ))
-
-            # Final step
-            db.add(RunStep(
-                run_id=run.id,
-                sequence=len(final_state["tool_results"]) + 1,
-                node="finalize",
-                status="completed",
-                output=final_state["final_output"],
-                started_at=run.finished_at,
-                finished_at=run.finished_at,
-            ))
-
             await db.commit()
             logger.info("run completed: %s", run_id)
 
@@ -148,5 +166,3 @@ async def run_agent(run_id: str) -> None:
                     await db.commit()
         except Exception:
             logger.exception("failed to write error state for run: %s", run_id)
-    finally:
-        await engine.dispose()
