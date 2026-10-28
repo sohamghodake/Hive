@@ -59,11 +59,15 @@ async def delete_run(run_id: uuid.UUID, db=DBSession):
 
 
 @router.get("/{run_id}/stream")
-async def stream_run(run_id: uuid.UUID, db=DBSession):
+async def stream_run(run_id: uuid.UUID):
     """SSE endpoint — streams step events as they're written to the DB."""
-    run = await db.get(Run, run_id)
-    if not run:
-        raise HTTPException(404, "Run not found")
+    # Deliberately not the request's DBSession: FastAPI closes a yield
+    # dependency only after the response has finished, so for a stream its
+    # transaction stayed open for up to 10 minutes. Behind PgBouncer's
+    # transaction pooling that pinned a server connection per open run page.
+    async with session_factory() as s:
+        if await s.scalar(select(Run.id).where(Run.id == run_id)) is None:
+            raise HTTPException(404, "Run not found")
 
     async def event_generator():
         last_seq = 0
