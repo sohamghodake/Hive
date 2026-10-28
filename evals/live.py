@@ -442,8 +442,9 @@ def result_match(gold: list[tuple], agent: list[tuple] | None) -> bool:
     for rows in candidates:
         if len(rows) != len(gold):
             continue
-        gcols = list(zip(*[[_cell(v) for v in r] for r in gold]))
-        acols = list(zip(*[[_cell(v) for v in r] for r in rows]))
+        gcols = list(zip(*[[_cell(v) for v in r] for r in gold], strict=True))
+        # The model's rows can be ragged; a short row then just fails to match.
+        acols = list(zip(*[[_cell(v) for v in r] for r in rows], strict=False))
         if all(any(_column_match(g, a) for a in acols) for g in gcols):
             return True
     return False

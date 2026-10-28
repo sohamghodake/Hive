@@ -7,7 +7,7 @@ import os
 import random
 import re
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_groq import ChatGroq
@@ -245,7 +245,7 @@ async def act(state: AgentState) -> AgentState:
             "input": tool_input,
             "output": content,
             "error": is_error,
-            "ts": datetime.now(timezone.utc).isoformat(),
+            "ts": datetime.now(UTC).isoformat(),
             "duration_ms": int((time.perf_counter() - started) * 1000),
             "server": TOOL_SERVERS.get(tool_name),
             # How often the cap cuts real content is the cost of the free tier.

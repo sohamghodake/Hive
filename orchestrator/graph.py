@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
@@ -57,7 +57,7 @@ async def run_agent(run_id: str) -> None:
             max_steps = int((agent.config or {}).get("max_steps", 8)) if agent else 8
 
             run.status = "running"
-            run.started_at = datetime.now(timezone.utc)
+            run.started_at = datetime.now(UTC)
             await db.commit()
 
         initial: AgentState = {
@@ -85,13 +85,13 @@ async def run_agent(run_id: str) -> None:
         sequence = 0
         persisted_tools = 0
         final_output = None
-        mark = datetime.now(timezone.utc)
+        mark = datetime.now(UTC)
 
         # Each iteration runs think→act (2 nodes); leave room for finalize.
         async for chunk in _graph.astream(
             initial, {"recursion_limit": max_steps * 2 + 4}, stream_mode="updates"
         ):
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             async with factory() as db:
                 for node, update in chunk.items():
                     if node == "think":
@@ -155,7 +155,7 @@ async def run_agent(run_id: str) -> None:
             run = await db.get(Run, run_uuid)
             run.status = "completed"
             run.output = final_output
-            run.finished_at = datetime.now(timezone.utc)
+            run.finished_at = datetime.now(UTC)
             await db.commit()
             logger.info("run completed: %s", run_id)
 
@@ -167,7 +167,7 @@ async def run_agent(run_id: str) -> None:
                 if run:
                     run.status = "failed"
                     run.error = str(exc)
-                    run.finished_at = datetime.now(timezone.utc)
+                    run.finished_at = datetime.now(UTC)
                     await db.commit()
         except Exception:
             logger.exception("failed to write error state for run: %s", run_id)

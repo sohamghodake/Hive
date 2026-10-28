@@ -17,15 +17,15 @@ import asyncio
 import json
 
 import numpy as np
+from sqlalchemy import select
 
-from evals._util import DATA, norm, save
-from rag.embeddings import chunk_text, embed_passages, embed_query
-from evals.live import ensure_document
-from db.session import _session_factory, engine
 from api.models.document import Document
+from db.session import _session_factory, engine
+from evals._util import DATA, norm, save
+from evals.live import ensure_document
 from orchestrator import tools
 from orchestrator.mcp_client import call_tool
-from sqlalchemy import select
+from rag.embeddings import chunk_text, embed_passages, embed_query
 
 # The clause list in contract-reviewer's prompt, as the model passes it.
 QUERIES = ["term and renewal", "termination", "limitation of liability", "indemnification",
@@ -48,7 +48,7 @@ def fill(hits_by_query: dict[str, list[dict]], per_query_first: bool, passage_ch
     ranked = sorted(best.values(), key=lambda h: h["score"], reverse=True)
     if per_query_first:
         firsts = []
-        for q, hits in hits_by_query.items():
+        for hits in hits_by_query.values():
             if hits:
                 top = best[(hits[0]["document_id"], hits[0]["chunk_index"])]
                 if top not in firsts:
@@ -75,7 +75,7 @@ def simulate(doc_text: str, size: int, overlap: int, passage_chars: int, qvecs) 
     pv = np.asarray(embed_passages(chunks), dtype=np.float32)
     pv /= np.linalg.norm(pv, axis=1, keepdims=True)
     hits = {}
-    for q, qv in zip(QUERIES, qvecs):
+    for q, qv in zip(QUERIES, qvecs, strict=True):
         sims = pv @ qv
         hits[q] = [{"document_id": "d", "chunk_index": int(i), "chunk_text": chunks[i], "score": float(sims[i])}
                    for i in np.argsort(-sims)[:3]]

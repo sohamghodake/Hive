@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -33,6 +33,6 @@ def norm(text: str) -> str:
 def save(name: str, payload: dict) -> Path:
     RESULTS.mkdir(exist_ok=True)
     path = RESULTS / name
-    payload = {"measured_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), **payload}
+    payload = {"measured_at": datetime.now(UTC).isoformat(timespec="seconds"), **payload}
     path.write_text(json.dumps(payload, indent=2) + "\n")
     return path

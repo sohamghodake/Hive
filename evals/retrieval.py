@@ -29,7 +29,14 @@ import time
 import numpy as np
 
 from evals._util import DATA, norm, pct, save
-from rag.embeddings import CHUNK_CHARS, CHUNK_OVERLAP, chunk_text, embed_passages, embed_query, to_pgvector
+from rag.embeddings import (
+    CHUNK_CHARS,
+    CHUNK_OVERLAP,
+    chunk_text,
+    embed_passages,
+    embed_query,
+    to_pgvector,
+)
 
 # (chunk size, overlap, context prefix); the first is what production uses.
 # "filename" prepends the upload's file name (all a PDF reliably has); "title" and
@@ -145,14 +152,14 @@ async def pgvector_check(chunks, pvecs, qvecs, questions) -> dict:
         )
         await conn.executemany(
             "INSERT INTO eval_chunks VALUES ($1, $2, $3, $4::vector)",
-            [(i, d, t, to_pgvector(v.tolist())) for i, ((d, _, t), v) in enumerate(zip(chunks, pvecs))],
+            [(i, d, t, to_pgvector(v.tolist())) for i, ((d, _, t), v) in enumerate(zip(chunks, pvecs, strict=True))],
         )
         await conn.execute("CREATE INDEX ON eval_chunks USING hnsw (embedding vector_cosine_ops)")
         await conn.execute("ANALYZE eval_chunks")
 
         sql = "SELECT pos FROM eval_chunks ORDER BY embedding <=> $1::vector LIMIT $2"
         ann_ranks, overlap, latencies = [], [], []
-        for qv, q in zip(qvecs, questions):
+        for qv, q in zip(qvecs, questions, strict=True):
             vec = to_pgvector(qv.tolist())
             async with conn.transaction():
                 # At this corpus size the planner would pick a sequential scan;

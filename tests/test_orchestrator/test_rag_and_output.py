@@ -6,7 +6,6 @@ from langchain_core.messages import AIMessage
 from orchestrator import nodes, tools
 from rag.embeddings import chunk_text, to_pgvector
 
-
 # ── Chunking ──────────────────────────────────────────────────────────────────
 
 def test_chunks_respect_size_and_keep_all_text():

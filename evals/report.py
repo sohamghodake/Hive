@@ -8,7 +8,7 @@ import json
 import re
 import statistics
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from evals._util import DATA, RESULTS, ROOT, pct
 
@@ -264,7 +264,7 @@ def agents_section() -> list[str]:
 
 def main() -> None:
     out = ["# Hive — measured results", "",
-           f"Generated {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC by `python -m evals.report` from `evals/results/`. "
+           f"Generated {datetime.now(UTC):%Y-%m-%d %H:%M} UTC by `python -m evals.report` from `evals/results/`. "
            "How to rerun each measurement is in [evals/README.md](README.md).", ""]
     for section in (agents_section, retrieval_section, load_section, tests_section):
         out += section()

@@ -22,7 +22,6 @@ import argparse
 import asyncio
 import json
 import os
-import statistics
 import time
 import uuid
 from urllib.parse import urlsplit
