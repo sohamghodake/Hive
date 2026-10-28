@@ -271,6 +271,14 @@ make psql           # psql shell
 docker compose exec api python scripts/seed.py --update   # refresh starter agents' prompts/tools
 ```
 
+### Dependencies
+
+`pyproject.toml` lists what the code imports, and `uv.lock` pins those and everything
+they pull in. The api image installs from the lock with `uv sync --locked`, which fails
+the build if the two disagree. Each MCP image installs its own `requirements.txt`,
+exported from the same lock with hashes. After changing a dependency, run `make lock`
+and commit the regenerated files with it.
+
 ### Tests
 
 57 tests: tool scoping, step budgets, the SQL/file/SSRF guards, all four MCP servers

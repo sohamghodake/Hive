@@ -1,0 +1,12 @@
+# The api and mcp-db images build from the repo root but copy only named
+# directories; keep the rest (a local .venv, worktrees, git history) out of the
+# build context.
+.git
+.venv
+.claude
+frontend
+workspace
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.mypy_cache

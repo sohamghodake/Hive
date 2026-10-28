@@ -2,28 +2,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY pyproject.toml .
-
-RUN pip install --no-cache-dir \
-    fastapi \
-    "uvicorn[standard]" \
-    pydantic \
-    pydantic-settings \
-    "sqlalchemy[asyncio]" \
-    asyncpg \
-    alembic \
-    langchain-openai \
-    langchain-groq \
-    langgraph \
-    fastmcp==4.0.10 \
-    fastembed==0.8.1 \
-    pypdf \
-    httpx \
-    aiofiles \
-    python-dotenv \
-    python-multipart \
-    pgvector \
-    sse-starlette
+# Install exactly what uv.lock pins, into /opt/venv. --locked fails the build if
+# pyproject.toml has changed without the lock being regenerated (`make lock`).
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv UV_PYTHON_DOWNLOADS=never UV_COMPILE_BYTECODE=1 \
+    PATH=/opt/venv/bin:$PATH
+COPY pyproject.toml uv.lock ./
+RUN --mount=from=ghcr.io/astral-sh/uv:0.13.6,source=/uv,target=/bin/uv \
+    uv sync --locked --no-dev --no-install-project --no-cache
 
 ENV FASTEMBED_CACHE_PATH=/models
 COPY rag/ ./rag/

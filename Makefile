@@ -1,4 +1,4 @@
-.PHONY: dev test build lint fmt migrate seed install
+.PHONY: dev test build lint fmt migrate seed install lock
 
 # ── Local dev ──────────────────────────────────────────────────────────────────
 dev:
@@ -12,7 +12,16 @@ dev-frontend:
 
 # ── Dependencies ───────────────────────────────────────────────────────────────
 install:
-	uv sync --all-extras
+	uv sync --locked
+
+# After editing dependencies in pyproject.toml (add --upgrade to `uv lock` to
+# move everything forward). The MCP images install the exported files.
+lock:
+	uv lock
+	for s in file db search api; do \
+		uv export --locked --quiet --only-group mcp-$$s --no-emit-project \
+			-o mcp_servers/mcp_$$s/requirements.txt || exit 1; \
+	done
 
 install-frontend:
 	cd frontend && npm install

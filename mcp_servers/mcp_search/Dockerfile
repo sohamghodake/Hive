@@ -1,6 +1,8 @@
 FROM python:3.12-slim
 WORKDIR /app
-RUN pip install --no-cache-dir fastmcp==4.0.10 "uvicorn[standard]" httpx
+# Exported from uv.lock (`make lock`): every package pinned and hash-checked.
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8003

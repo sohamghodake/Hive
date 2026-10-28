@@ -3,43 +3,53 @@ name = "hive"
 version = "0.1.0"
 description = "Multi-agent orchestration platform"
 requires-python = ">=3.12"
+# What the code imports. Exact versions of these and everything they pull in
+# live in uv.lock; the api image installs from it, and each MCP image installs
+# its group below as exported to mcp_servers/*/requirements.txt (`make lock`).
 dependencies = [
-    "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.32.0",
-    "pydantic>=2.10.0",
-    "pydantic-settings>=2.6.0",
-    "sqlalchemy[asyncio]>=2.0.36",
-    "asyncpg>=0.30.0",
-    "alembic>=1.14.0",
-    "langchain-openai>=0.3.0",
-    "langgraph>=0.2.60",
-    "mcp>=1.2.0",
-    "fastmcp>=0.4.0",
-    "httpx>=0.28.0",
-    "aiofiles>=24.1.0",
-    "python-dotenv>=1.0.0",
-    "python-multipart>=0.0.18",
-    "pgvector>=0.3.5",
-    "sentence-transformers>=3.3.0",
-    "sse-starlette>=2.1.0",
+    "fastapi>=0.142.2",
+    "starlette>=1.7.0",
+    "uvicorn[standard]>=0.54.0",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "sqlalchemy[asyncio]>=2.1.1",
+    "asyncpg>=0.31.0",
+    "alembic>=1.20.0",
+    "pgvector>=0.5.0",
+    "langchain-core>=1.6.6",
+    "langchain-groq>=1.1.3",
+    "langgraph>=1.2.12",
+    # Exact: fastmcp's API moves between releases, and the api and mcp-db
+    # images must embed with the same fastembed build.
+    "fastmcp==4.0.10",
+    "fastembed==0.8.1",
+    "pypdf>=6.19.0",
+    "httpx>=0.28.1",
+    "aiofiles>=25.1.0",
+    "python-multipart>=0.0.32",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=6.0.0",
-    "httpx>=0.28.0",
     "ruff>=0.8.0",
     "mypy>=1.13.0",
 ]
+# One per MCP server image. Unversioned: the lock resolves them together with
+# the dependencies above, so a server runs the same versions the tests do.
+mcp-file = ["fastmcp", "starlette", "uvicorn[standard]", "aiofiles"]
+mcp-db = ["fastmcp", "starlette", "uvicorn[standard]", "asyncpg", "fastembed"]
+mcp-search = ["fastmcp", "starlette", "uvicorn[standard]", "httpx"]
+mcp-api = ["fastmcp", "starlette", "uvicorn[standard]", "httpx"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["api", "orchestrator", "db"]
+packages = ["api", "orchestrator", "db", "rag"]
 
 [tool.ruff]
 line-length = 100

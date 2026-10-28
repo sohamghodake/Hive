@@ -2,7 +2,9 @@
 # api image — query and passage embeddings must come from the same model.
 FROM python:3.12-slim
 WORKDIR /app
-RUN pip install --no-cache-dir fastmcp==4.0.10 "uvicorn[standard]" asyncpg fastembed==0.8.1
+# Exported from uv.lock (`make lock`): every package pinned and hash-checked.
+COPY mcp_servers/mcp_db/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 ENV FASTEMBED_CACHE_PATH=/models PYTHONUNBUFFERED=1 PYTHONPATH=/app
 COPY rag/ ./rag/
