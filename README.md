@@ -31,6 +31,11 @@ tool only if its configuration grants it, and that boundary is enforced at run t
 
 Eight services: `api`, `frontend`, `postgres`, `pgbouncer`, and the four MCP servers.
 
+**Measured results** — agent accuracy on labelled tasks (with gpt-oss-120b), retrieval
+quality, prompt-injection resistance, concurrency and cost per task — are in
+[evals/RESULTS.md](evals/RESULTS.md); [evals/README.md](evals/README.md) explains how
+to rerun each one.
+
 ---
 
 ## Quickstart
@@ -165,17 +170,23 @@ root), so documents and queries are always embedded by the same model.
 persistence — with only the LLM stubbed (400 ms per turn; real concurrent runs would
 measure Groq's rate limiter). A separate connection samples `pg_stat_activity`.
 
-Four simulated API workers, each running 100 runs at 50 concurrent, against
-Postgres' default `max_connections = 100`:
+`scripts/load_sweep.py` runs 1, 2 and 4 simulated API workers (separate processes)
+at 10, 50 and 100 concurrent runs each, against Postgres' default `max_connections = 100`:
 
 | Path | Runs completed | Peak Postgres backends |
 |---|---|---|
-| Through PgBouncer | **400 / 400** | **23** |
-| Direct to Postgres | 261 / 400 | 99 — `sorry, too many clients already` |
+| Through PgBouncer, all 9 configurations | **2,450 / 2,450** | **12–31**, flat as workers are added |
+| Direct, 4 workers × 50 | 316 / 400 | 99 — `sorry, too many clients already` |
 
-For a single worker (200 runs, 100 concurrent), both paths complete everything at
-about 28 runs/s. PgBouncer does not make a run faster; it keeps backend usage flat as
-workers are added.
+PgBouncer does not make a run faster; it keeps backend usage flat as workers are added.
+Throughput varied about 2× between identical sweeps on the WSL2 machine used, so it is
+not quoted here; full tables are in [evals/RESULTS.md](evals/RESULTS.md).
+
+On WSL2, the sweep was measured with PgBouncer's `query_wait_timeout` and
+`client_login_timeout` set to 0. Under load, WSL2 steps the wall clock back about a second
+every ~30 s. PgBouncer times client waits with the wall clock, so each step disconnects
+every waiting client at once (2–10% of runs at 4 workers), even though no client had
+waited more than a second. This is an environment artifact, not a pooling limit.
 
 ```bash
 docker compose exec api python scripts/load_test.py --runs 200 --concurrency 100
@@ -232,7 +243,10 @@ answers are cut off mid-sentence. So each call requests the budget left after an
 estimate of its prompt, between 512 and `LLM_MAX_OUTPUT_TOKENS`.
 
 On 429, Hive waits the time Groq's error states ("try again in 7.5s") rather than
-guessing. On 413 it fails with an actionable message, since retrying cannot help.
+guessing. On 413 it fails with an actionable message, since retrying cannot help. When
+the *daily* limit is spent, Groq asks for a wait of up to hours; the run fails at once
+instead of spending more of the daily request allowance on retries. Each think step
+records its model time, rate-limit wait and retries, so slow runs can be attributed.
 
 ### Choosing a model
 
@@ -285,7 +299,8 @@ and commit the regenerated files with it.
 
 The suite covers tool scoping, step budgets, the SQL/file/SSRF guards, all four MCP
 servers over the real protocol (fastmcp's in-memory client), the read-only database
-role, chunking, batched search, structured-output parsing, and the API. CI
+role, whole runs through `run_agent` with a scripted model, upload → index → search,
+chunking, structured-output parsing, rate-limit handling, and the API. CI
 ([`ci.yml`](.github/workflows/ci.yml)) runs it on every push and pull request against a
 pgvector service container, along with ruff and a check that the lock files are current.
 
@@ -355,7 +370,8 @@ rag/            Chunking + embeddings, shared by api and mcp-db
 pgbouncer/      PgBouncer image and config (transaction pooling)
 db/             Engine and session setup
 migrations/     Alembic — applied automatically on API start (direct to Postgres)
-scripts/        seed.py (starter agents), load_test.py
+scripts/        seed.py (starter agents), load_test.py, load_sweep.py
+evals/          retrieval, search-coverage and live agent evals; RESULTS.md
 frontend/       Next.js 15 App Router, TanStack Query, plain CSS tokens
 tests/          pytest suites
 ```

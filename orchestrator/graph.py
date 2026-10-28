@@ -71,6 +71,7 @@ async def run_agent(run_id: str) -> None:
             "tool_results": [],
             "final_output": None,
             "error": None,
+            "call_stats": None,
             "model": model,
             "tool_names": tool_names,
             "max_steps": max_steps,
@@ -105,6 +106,7 @@ async def run_agent(run_id: str) -> None:
                                 # Token usage per model call makes cost auditable per step.
                                 "usage": getattr(msg, "usage_metadata", None),
                                 "finish_reason": (msg.response_metadata or {}).get("finish_reason"),
+                                **(update.get("call_stats") or {}),
                             },
                             started_at=mark, finished_at=now,
                         ))
@@ -113,12 +115,15 @@ async def run_agent(run_id: str) -> None:
                         for tr in update["tool_results"][persisted_tools:]:
                             ended = datetime.fromisoformat(tr["ts"])
                             started = ended - timedelta(milliseconds=tr.get("duration_ms") or 0)
+                            result = {"result": tr["output"]}
+                            if tr.get("truncated"):
+                                result |= {"truncated": True, "full_chars": tr["full_chars"]}
                             sequence += 1
                             step = RunStep(
                                 run_id=run_uuid, sequence=sequence, node="act",
                                 status="failed" if tr["error"] else "completed",
                                 input={"tool": tr["tool"], "args": tr["input"]},
-                                output={"result": tr["output"]},
+                                output=result,
                                 started_at=started, finished_at=ended,
                             )
                             db.add(step)
@@ -129,7 +134,7 @@ async def run_agent(run_id: str) -> None:
                                 tool_name=tr["tool"],
                                 mcp_server=tr.get("server"),
                                 input=tr["input"],
-                                output=None if tr["error"] else {"result": tr["output"]},
+                                output=None if tr["error"] else result,
                                 error=tr["output"] if tr["error"] else None,
                                 duration_ms=tr.get("duration_ms"),
                             ))

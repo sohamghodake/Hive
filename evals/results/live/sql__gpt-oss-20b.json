@@ -1,0 +1,145 @@
+{
+ "tasks": {
+  "agents-with-web-search": {
+   "run_id": "931b48a2-f391-41a8-b3ef-40ab750141bf",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT id, name FROM agents WHERE tools @> '\"web_search\"'::jsonb;",
+     "answer": "Four agents have the web_search tool: code-analyst, data-analyst, research-agent, and market-researcher.",
+     "question": "Which agents are configured with the web_search tool?",
+     "row_count": 4
+    },
+    "text": "Four agents are configured with the **web_search** tool:\n\n| Agent ID | Name |\n|----------|------|\n| 39986a3e-2ca2-4a02-b971-a24be98b3468 | code-analyst |\n| ec393583-2e49-4fa3-89f8-a04053998809 | data-analyst |\n| 418db7e5-b70c-498c-abf4-c1f74b9d9ce8 | research-agent |\n| 5fa2159f-d03a-4d5c-a656-1edead52b9c5 | market-researcher |\n\n```json\n{\n  \"question\": \"Which agents are configured with the web_search tool?\",\n  \"sql\": \"SELECT id, name FROM agents WHERE tools @> '\\\"web_search\\\"'::jsonb;\",\n  \"row_count\": 4,\n  \"answer\": \"Four agents have the web_search tool: code-analyst, data-analyst, research-agent, and market-researcher.\"\n}\n```"
+   },
+   "duration_s": 38.96,
+   "first_step_s": 1.66,
+   "llm_calls": 7,
+   "tokens_in": 5096,
+   "tokens_out": 640,
+   "tokens": 5736,
+   "reasoning_tokens": 233,
+   "reserved_max_tokens": 28672,
+   "llm_s": 40.41,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 40
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "agents"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"description\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"system_prompt\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"model\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"tools\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"config\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"updated_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 150
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT id, name, tools FROM agents WHERE tools @> '[{\"name\": \"web_search\"}]';"
+     },
+     "error": null,
+     "output": "{\"rows\": [], \"count\": 0, \"truncated\": false}",
+     "truncated": false,
+     "ms": 22
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "agents"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"description\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"system_prompt\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"model\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"tools\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"config\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"updated_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 125
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT tools FROM agents LIMIT 5;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"tools\": \"[\\\"read_file\\\", \\\"write_file\\\"]\"}, {\"tools\": \"[\\\"read_file\\\", \\\"write_file\\\", \\\"list_files\\\"]\"}, {\"tools\": \"[\\\"read_file\\\", \\\"list_files\\\", \\\"write_file\\\", \\\"web_search\\\"]\"}, {\"tools\": \"[\\\"query_database\\\", \\\"web_search\\\", \\\"write_file\\\"]\"}, {\"tools\": \"[\\\"list_tables\\\", \\\"describe_table\\\", \\\"query_database\\\"]\"}], \"count\": 5, \"truncated\": false}",
+     "truncated": false,
+     "ms": 33
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT id, name FROM agents WHERE tools @> '\"web_search\"'::jsonb;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"id\": \"39986a3e-2ca2-4a02-b971-a24be98b3468\", \"name\": \"code-analyst\"}, {\"id\": \"ec393583-2e49-4fa3-89f8-a04053998809\", \"name\": \"data-analyst\"}, {\"id\": \"418db7e5-b70c-498c-abf4-c1f74b9d9ce8\", \"name\": \"research-agent\"}, {\"id\": \"5fa2159f-d03a-4d5c-a656-1edead52b9c5\", \"name\": \"market-researcher\"}], \"count\": 4, \"truncated\": false}",
+     "truncated": false,
+     "ms": 22
+    }
+   ],
+   "task": "agents-with-web-search",
+   "suite": "sql",
+   "model": "openai/gpt-oss-20b",
+   "agent": "sql-analyst",
+   "wall_s": 41.22,
+   "cache_mode": "replay",
+   "live_calls": 7,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "code-analyst"
+     ],
+     [
+      "data-analyst"
+     ],
+     [
+      "market-researcher"
+     ],
+     [
+      "research-agent"
+     ]
+    ],
+    "agent": [
+     [
+      "39986a3e-2ca2-4a02-b971-a24be98b3468",
+      "code-analyst"
+     ],
+     [
+      "ec393583-2e49-4fa3-89f8-a04053998809",
+      "data-analyst"
+     ],
+     [
+      "418db7e5-b70c-498c-abf4-c1f74b9d9ce8",
+      "research-agent"
+     ],
+     [
+      "5fa2159f-d03a-4d5c-a656-1edead52b9c5",
+      "market-researcher"
+     ]
+    ]
+   }
+  }
+ }
+}

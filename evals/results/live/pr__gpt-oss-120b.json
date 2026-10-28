@@ -1,0 +1,463 @@
+{
+ "tasks": {
+  "01-pagination": {
+   "run_id": "22f00b09-cd61-4672-acf2-7d739069202e",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "pr": "evals/pr/01-pagination.diff",
+     "issues": [
+      {
+       "file": "app/pagination.py",
+       "issue": "page_count uses floor division, omitting the last partial page",
+       "severity": "high",
+       "suggestion": "Use math.ceil(total_items / page_size) or add a check for remainder"
+      }
+     ],
+     "verdict": "request_changes"
+    },
+    "text": "The PR introduces a critical bug: `page_count` now uses floor division, dropping the final partial page and causing missing order rows during export. Fix the page count logic to use `math.ceil` (or equivalent) before merging.\n\n```json\n{\n  \"pr\": \"evals/pr/01-pagination.diff\",\n  \"verdict\": \"request_changes\",\n  \"issues\": [\n    {\n      \"file\": \"app/pagination.py\",\n      \"severity\": \"high\",\n      \"issue\": \"page_count uses floor division, omitting the last partial page\",\n      \"suggestion\": \"Use math.ceil(total_items / page_size) or add a check for remainder\"\n    }\n  ]\n}\n```"
+   },
+   "duration_s": 3.65,
+   "first_step_s": 1.18,
+   "llm_calls": 3,
+   "tokens_in": 2497,
+   "tokens_out": 665,
+   "tokens": 3162,
+   "reasoning_tokens": 49,
+   "reserved_max_tokens": 12288,
+   "llm_s": 3.27,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "evals/pr/01-pagination.diff"
+     },
+     "error": null,
+     "output": "diff --git a/app/pagination.py b/app/pagination.py\nindex 3b1f2c4..9d0e7a1 100644\n--- a/app/pagination.py\n+++ b/app/pagination.py\n@@ -1,10 +1,19 @@\n import math\n \n \n-def page_count(total_items: int, page_size: int) -> int:\n-    return math.ceil(total_items / page_size)\n+def page_count(total_items: int, page_size: int) -> int:\n+    \"\"\"Number of pages needed to show every item.\"\"\"\n+    if page_size <= 0:\n+        raise ValueError(\"page_size must be positive\")\n+    return total_items // page_size\n \n \n-def page_slice(items: list, page: int, page_size: int) -> list:\n-    start = (page - 1) * page_size\n-    return items[start:start + page_size]\n+def iter_pages(items: list, page_size: int):\n+    \"\"\"Yield (page_number, items_on_page) for every page, 1-indexed.\"\"\"\n+    for page in range(1, page_count(len(items), page_size) + 1):\n+        start = (page - 1) * page_size\n+        yield page, items[start:start + page_size]\ndiff --git a/app/export.py b/app/export.py\nindex 71c2d90..a4e81f3 100644\n--- a/app/export.py\n+++ b/app/export.py\n@@ -1,12 +1,11 @@\n-from app.pagination import page_count, page_slice\n+from app.pagination import iter_pages\n \n \n def export_orders(orders, writer, page_size=100):\n-    for page in range(1, page_count(len(orders), page_size) + 1):\n-        for order in page_slice(orders, page, page_size):\n-            writer.write(order.to_csv_row())\n+    for _, batch in iter_pages(orders, page_size):\n+        writer.write_rows(o.to_csv_row() for o in batch)\n     writer.flush()\n",
+     "truncated": false,
+     "ms": 40
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "reviews/pr-unknown-unknown-01.md",
+      "content": "## Review of PR: Paginate order exports with iter_pages\n\n### Correctness Bugs\n- **File `app/pagination.py`, line 8**: `page_count` now uses integer division (`total_items // page_size`). This returns the floor, causing the last page to be omitted when `total_items` is not an exact multiple of `page_size`. The original implementation used `math.ceil` to correctly compute the number of pages. This bug propagates to `iter_pages`, which relies on `page_count` and will miss items on the final partial page.\n  - **Suggestion**: Restore the original behavior by using `math.ceil(total_items / page_size)` or adjust the logic to add an extra page when there is a remainder.\n\n- **File `app/pagination.py`, line 15**: The docstring for `iter_pages` mentions yielding \"items_on_page\" but the variable `items` is not defined; the code uses `items[start:start + page_size]` which references the outer `items` correctly, but the name clash with the function argument could be confusing. No functional bug, but clarify naming.\n\n### Security Issues\n- No new security concerns introduced. The changes only affect pagination logic and do not handle user\u2011provided data in a way that creates injection or leakage risks.\n\n### Maintainability\n- The new `iter_pages` function is a good abstraction, but the regression in `page_count` undermines its reliability. Restoring correct page count logic will keep the module intuitive.\n- The import change in `export.py` is clean, but the call to `writer.write_rows` assumes the writer has this method; ensure the writer interface is documented.\n\n### Summary\nThe primary issue is the incorrect page count calculation, which will cause missing order rows during export when the total number of orders is not a multiple of the page size. Fixing this restores correct pagination.\n"
+     },
+     "error": null,
+     "output": "Wrote 1802 characters to reviews/pr-unknown-unknown-01.md",
+     "truncated": false,
+     "ms": 21
+    }
+   ],
+   "task": "01-pagination",
+   "suite": "pr",
+   "model": "openai/gpt-oss-120b",
+   "agent": "eval-pr-reviewer",
+   "wall_s": 3.68,
+   "cache_mode": "replay",
+   "live_calls": 3,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "verdict": "request_changes",
+    "issues": 1,
+    "verdict_ok": true,
+    "bug_caught": true,
+    "bug_mentioned": true,
+    "bug_severity": "high"
+   }
+  },
+  "02-order-search": {
+   "run_id": "a4264bfd-ab10-4f3e-9dc2-4392f433956c",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "pr": "evals/pr/02-order-search.diff",
+     "issues": [
+      {
+       "file": "app/routes/support.py",
+       "issue": "NameError due to missing import of find_orders",
+       "severity": "high",
+       "suggestion": "Add `from app.orders import find_orders` at the top of the file"
+      },
+      {
+       "file": "app/orders.py",
+       "issue": "SQL injection vulnerability from string interpolation",
+       "severity": "high",
+       "suggestion": "Rewrite find_orders to use parameterized queries and validate inputs"
+      }
+     ],
+     "verdict": "request_changes"
+    },
+    "text": "The PR has critical bugs: missing import for `find_orders` and unsafe string\u2011interpolated SQL leading to injection risks. Fix the import, use parameterized queries, and add basic input validation.\n\n```json\n{\n  \"pr\": \"evals/pr/02-order-search.diff\",\n  \"verdict\": \"request_changes\",\n  \"issues\": [\n    {\n      \"file\": \"app/routes/support.py\",\n      \"severity\": \"high\",\n      \"issue\": \"NameError due to missing import of find_orders\",\n      \"suggestion\": \"Add `from app.orders import find_orders` at the top of the file\"\n    },\n    {\n      \"file\": \"app/orders.py\",\n      \"severity\": \"high\",\n      \"issue\": \"SQL injection vulnerability from string interpolation\",\n      \"suggestion\": \"Rewrite find_orders to use parameterized queries and validate inputs\"\n    }\n  ]\n}\n```"
+   },
+   "duration_s": 3.04,
+   "first_step_s": 0.42,
+   "llm_calls": 3,
+   "tokens_in": 2537,
+   "tokens_out": 822,
+   "tokens": 3359,
+   "reasoning_tokens": 44,
+   "reserved_max_tokens": 12288,
+   "llm_s": 2.91,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "evals/pr/02-order-search.diff"
+     },
+     "error": null,
+     "output": "diff --git a/app/orders.py b/app/orders.py\nindex 0c4d2e1..5f9b7aa 100644\n--- a/app/orders.py\n+++ b/app/orders.py\n@@ -1,12 +1,24 @@\n from app.db import get_connection\n \n \n-def get_order(order_id: int):\n-    conn = get_connection()\n-    return conn.execute(\"SELECT id, total, status FROM orders WHERE id = %s\", (order_id,)).fetchone()\n+def get_order(order_id: int):\n+    conn = get_connection()\n+    return conn.execute(\"SELECT id, total, status FROM orders WHERE id = %s\", (order_id,)).fetchone()\n+\n+\n+def find_orders(customer_email: str, status: str | None = None) -> list:\n+    \"\"\"Orders for a customer, optionally filtered by status. Used by the support search page.\"\"\"\n+    conn = get_connection()\n+    sql = f\"SELECT id, total, status FROM orders WHERE customer_email = '{customer_email}'\"\n+    if status:\n+        sql += f\" AND status = '{status}'\"\n+    sql += \" ORDER BY created_at DESC LIMIT 50\"\n+    return conn.execute(sql).fetchall()\ndiff --git a/app/routes/support.py b/app/routes/support.py\nindex 9a1b3c2..e2f4d5b 100644\n--- a/app/routes/support.py\n+++ b/app/routes/support.py\n@@ -8,3 +8,9 @@ def order_detail(request, order_id: int):\n     return render(request, \"order.html\", {\"order\": get_order(order_id)})\n+\n+\n+def order_search(request):\n+    email = request.GET.get(\"email\", \"\")\n+    status = request.GET.get(\"status\")\n+    return render(request, \"orders.html\", {\"orders\": find_orders(email, status)})\n",
+     "truncated": false,
+     "ms": 25
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "reviews/pr-owner-repo-02-order-search.md",
+      "content": "## Review of PR Add order search to the support page\n\n### Correctness Bugs\n- **app/routes/support.py:13** \u2013 The `order_search` view calls `find_orders(email, status)` but the function `find_orders` is not imported from `app.orders`. This will raise a `NameError` at runtime. **Severity: high**.\n- **app/orders.py:12-18** \u2013 The `find_orders` function builds the SQL query by interpolating `customer_email` and `status` directly into the string. This is vulnerable to SQL injection and also can break the query if the values contain quotes. Use parameterized queries instead. **Severity: high**.\n\n### Security Issues\n- The same issue above (SQL injection) is a critical security flaw. An attacker could craft a malicious email value like `test@example.com' OR '1'='1` to retrieve all orders.\n- No validation or sanitization of the `email` query parameter in `order_search`. Combined with the injection risk, this amplifies the threat.\n\n### Maintainability\n- The function `find_orders` returns a raw list of rows; consider returning a list of domain objects or using a serializer for consistency with other parts of the code.\n- The docstring is good, but the SQL construction logic could be refactored to a helper that builds parameter lists, improving readability.\n- Adding type hints for the return type (`list[dict]` or appropriate model) would aid static analysis.\n\n### Recommendations\n1. Import `find_orders` in `app/routes/support.py`:\n   ```python\n   from app.orders import find_orders\n   ```\n2. Rewrite `find_orders` to use parameterized queries:\n   ```python\n   sql = \"SELECT id, total, status FROM orders WHERE customer_email = %s\"\n   params = [customer_email]\n   if status:\n       sql += \" AND status = %s\"\n       params.append(status)\n   sql += \" ORDER BY created_at DESC LIMIT 50\"\n   return conn.execute(sql, tuple(params)).fetchall()\n   ```\n3. Validate that `email` is provided and is a properly formatted email address before querying; return an empty list or an error message if missing.\n4. Consider defining a proper Order model or using a serializer for the returned data.\n\nThese changes address the critical bugs and security concerns while improving code clarity.\n"
+     },
+     "error": null,
+     "output": "Wrote 2181 characters to reviews/pr-owner-repo-02-order-search.md",
+     "truncated": false,
+     "ms": 23
+    }
+   ],
+   "task": "02-order-search",
+   "suite": "pr",
+   "model": "openai/gpt-oss-120b",
+   "agent": "eval-pr-reviewer",
+   "wall_s": 3.07,
+   "cache_mode": "replay",
+   "live_calls": 3,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "verdict": "request_changes",
+    "issues": 2,
+    "verdict_ok": true,
+    "bug_caught": true,
+    "bug_mentioned": true,
+    "bug_severity": "high"
+   }
+  },
+  "03-notify": {
+   "run_id": "7345fc2c-feb4-4ce8-9f8b-492adb04fcae",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "pr": "evals/pr/03-notify.diff",
+     "issues": [
+      {
+       "file": "src/notify.js",
+       "issue": "Async forEach does not await sendEmail calls, leading to premature markNotified and uncaught errors.",
+       "severity": "high",
+       "suggestion": "Collect promises with users.map and await Promise.all before calling markNotified."
+      }
+     ],
+     "verdict": "request_changes"
+    },
+    "text": "The diff was reviewed (src/notify.js). The new parallel logic is incorrect: `forEach` doesn\u2019t await async calls, causing `markNotified` to run too early and errors to be missed. Replace the loop with `Promise.all` over a mapped array of `sendEmail` promises.\n\n```json\n{\n  \"pr\": \"evals/pr/03-notify.diff\",\n  \"verdict\": \"request_changes\",\n  \"issues\": [\n    {\n      \"file\": \"src/notify.js\",\n      \"severity\": \"high\",\n      \"issue\": \"Async forEach does not await sendEmail calls, leading to premature markNotified and uncaught errors.\",\n      \"suggestion\": \"Collect promises with users.map and await Promise.all before calling markNotified.\"\n    }\n  ]\n}\n```"
+   },
+   "duration_s": 2.28,
+   "first_step_s": 0.47,
+   "llm_calls": 3,
+   "tokens_in": 2099,
+   "tokens_out": 661,
+   "tokens": 2760,
+   "reasoning_tokens": 67,
+   "reserved_max_tokens": 12288,
+   "llm_s": 3.22,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "evals/pr/03-notify.diff"
+     },
+     "error": null,
+     "output": "diff --git a/src/notify.js b/src/notify.js\nindex 4e2a9b1..c7d03f8 100644\n--- a/src/notify.js\n+++ b/src/notify.js\n@@ -1,14 +1,20 @@\n const { sendEmail } = require(\"./mailer\");\n const { markNotified } = require(\"./store\");\n const logger = require(\"./logger\");\n \n-async function notifyAll(users) {\n-  for (const user of users) {\n-    await sendEmail(user.email, template(user));\n-  }\n-  await markNotified(users.map((u) => u.id));\n-}\n+// Send in parallel instead of one at a time; the sequential loop took minutes\n+// for large mailing lists.\n+async function notifyAll(users) {\n+  try {\n+    users.forEach(async (user) => {\n+      await sendEmail(user.email, template(user));\n+    });\n+    await markNotified(users.map((u) => u.id));\n+  } catch (err) {\n+    logger.error(\"notification batch failed\", err);\n+    throw err;\n+  }\n+}\n \n function template(user) {\n   return `Hi ${user.firstName}, your order has shipped.`;\n }\n",
+     "truncated": false,
+     "ms": 46
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "reviews/pr-unknown-unknown-03.md",
+      "content": "## Review of PR: Send shipping notifications in parallel\n\n### Correctness Bugs\n- **File:** `src/notify.js` **Lines:** 9-16\n  - The new implementation uses `users.forEach(async (user) => { await sendEmail(...) })`. `Array.prototype.forEach` does **not** await the async callbacks, so the `await markNotified(...)` runs immediately, before any emails are actually sent. This also means that any rejection from `sendEmail` will not be caught by the surrounding `try/catch`, leading to silent failures.\n  - **Suggested fix:** Collect the promises and await them, e.g.:\n    ```js\n    const sendPromises = users.map(user => sendEmail(user.email, template(user)));\n    await Promise.all(sendPromises);\n    await markNotified(users.map(u => u.id));\n    ```\n\n### Security Issues\n- No new security concerns introduced in this diff, but be aware that sending emails in parallel could increase load on the mail server. Ensure rate\u2011limiting or back\u2011pressure mechanisms are in place if the mailing list can be very large.\n\n### Maintainability\n- The added `try/catch` block is now ineffective because the async errors from `forEach` are not propagated. Refactoring to `Promise.all` not only fixes correctness but also simplifies error handling \u2013 a single `try/catch` around the `await Promise.all(...)` is sufficient.\n\n### Summary\nThe parallelization intent is good for performance, but the current implementation is flawed and may cause missed notifications and uncaught errors. Replace the `forEach` with a proper promise aggregation pattern.\n"
+     },
+     "error": null,
+     "output": "Wrote 1530 characters to reviews/pr-unknown-unknown-03.md",
+     "truncated": false,
+     "ms": 21
+    }
+   ],
+   "task": "03-notify",
+   "suite": "pr",
+   "model": "openai/gpt-oss-120b",
+   "agent": "eval-pr-reviewer",
+   "wall_s": 3.4,
+   "cache_mode": "replay",
+   "live_calls": 3,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "verdict": "request_changes",
+    "issues": 1,
+    "verdict_ok": true,
+    "bug_caught": true,
+    "bug_mentioned": true,
+    "bug_severity": "high"
+   }
+  },
+  "04-cart": {
+   "run_id": "9a38fe35-f42c-4e77-98ce-cb28e40826e6",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "pr": "evals/pr/04-cart.diff",
+     "issues": [
+      {
+       "file": "app/cart.py",
+       "issue": "Mutable default argument for items list leads to shared state across Cart instances.",
+       "severity": "high",
+       "suggestion": "Change the default to None and initialize with an empty list inside the constructor."
+      }
+     ],
+     "verdict": "request_changes"
+    },
+    "text": "The diff introduces a mutable default argument in `Cart.__init__`, which can cause shared state across instances and must be fixed. No security issues were found, and the code is otherwise maintainable.\n\n```json\n{\n  \"pr\": \"evals/pr/04-cart.diff\",\n  \"verdict\": \"request_changes\",\n  \"issues\": [\n    {\n      \"file\": \"app/cart.py\",\n      \"severity\": \"high\",\n      \"issue\": \"Mutable default argument for items list leads to shared state across Cart instances.\",\n      \"suggestion\": \"Change the default to None and initialize with an empty list inside the constructor.\"\n    }\n  ]\n}\n```"
+   },
+   "duration_s": 2.59,
+   "first_step_s": 0.57,
+   "llm_calls": 3,
+   "tokens_in": 1896,
+   "tokens_out": 453,
+   "tokens": 2349,
+   "reasoning_tokens": 34,
+   "reserved_max_tokens": 12288,
+   "llm_s": 2.35,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "evals/pr/04-cart.diff"
+     },
+     "error": null,
+     "output": "diff --git a/app/cart.py b/app/cart.py\nnew file mode 100644\nindex 0000000..b81c3e2\n--- /dev/null\n+++ b/app/cart.py\n@@ -0,0 +1,24 @@\n+from dataclasses import dataclass\n+\n+\n+@dataclass\n+class LineItem:\n+    sku: str\n+    qty: int\n+    unit_cents: int\n+\n+\n+class Cart:\n+    def __init__(self, owner: str, items: list = []):\n+        self.owner = owner\n+        self.items = items\n+\n+    def add(self, sku: str, qty: int, unit_cents: int) -> None:\n+        if qty <= 0:\n+            raise ValueError(\"qty must be positive\")\n+        self.items.append(LineItem(sku, qty, unit_cents))\n+\n+    def total_cents(self) -> int:\n+        return sum(i.qty * i.unit_cents for i in self.items)\n+\n+    def is_empty(self) -> bool:\n+        return not self.items\n",
+     "truncated": false,
+     "ms": 21
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "reviews/pr-<owner>-<repo>-04-cart.md",
+      "content": "## Review of PR: Add a Cart model (evals/pr/04-cart.diff)\n\n### Correctness Bugs\n- **app/cart.py:7**: The `Cart.__init__` uses a mutable default argument `items: list = []`. This leads to shared state across `Cart` instances. **Fix**: change the signature to `def __init__(self, owner: str, items: Optional[List[LineItem]] = None):` and inside set `self.items = items or []`.\n\n### Security Issues\n- No immediate security concerns are present in this diff.\n\n### Maintainability\n- The `LineItem` dataclass is simple and clear.\n- Consider adding type hints for the `items` list (e.g., `list[LineItem]`).\n- Adding docstrings for `Cart` methods would improve readability.\n\n**Overall**: The primary blocker is the mutable default argument which can cause subtle bugs in production.\n"
+     },
+     "error": null,
+     "output": "Wrote 775 characters to reviews/pr-<owner>-<repo>-04-cart.md",
+     "truncated": false,
+     "ms": 46
+    }
+   ],
+   "task": "04-cart",
+   "suite": "pr",
+   "model": "openai/gpt-oss-120b",
+   "agent": "eval-pr-reviewer",
+   "wall_s": 2.64,
+   "cache_mode": "replay",
+   "live_calls": 3,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "verdict": "request_changes",
+    "issues": 1,
+    "verdict_ok": true,
+    "bug_caught": true,
+    "bug_mentioned": true,
+    "bug_severity": "high"
+   }
+  },
+  "05-dashboard-cache": {
+   "run_id": "8b9960c7-0fb7-4ba9-8624-69060e8912e0",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "pr": "evals/pr/05-dashboard-cache.diff",
+     "issues": [
+      {
+       "file": "app/views/dashboard.py",
+       "issue": "Cache key uses request.path only, risking cross\u2011user data leakage.",
+       "severity": "high",
+       "suggestion": "Include user identifier (e.g., request.user.id) in the cache key."
+      },
+      {
+       "file": "app/views/dashboard.py",
+       "issue": "Unbounded module\u2011level cache may grow indefinitely.",
+       "severity": "medium",
+       "suggestion": "Use a bounded cache (e.g., LRU) or external cache with eviction."
+      }
+     ],
+     "verdict": "request_changes"
+    },
+    "text": "The patch introduces a risky cache key that can expose one user\u2019s dashboard data to another and may cause unbounded memory growth.\u202fPlease fix the key handling and adopt a safer caching strategy.\n\n```json\n{\n  \"pr\": \"evals/pr/05-dashboard-cache.diff\",\n  \"verdict\": \"request_changes\",\n  \"issues\": [\n    {\n      \"file\": \"app/views/dashboard.py\",\n      \"severity\": \"high\",\n      \"issue\": \"Cache key uses request.path only, risking cross\u2011user data leakage.\",\n      \"suggestion\": \"Include user identifier (e.g., request.user.id) in the cache key.\"\n    },\n    {\n      \"file\": \"app/views/dashboard.py\",\n      \"severity\": \"medium\",\n      \"issue\": \"Unbounded module\u2011level cache may grow indefinitely.\",\n      \"suggestion\": \"Use a bounded cache (e.g., LRU) or external cache with eviction.\"\n    }\n  ]\n}\n```"
+   },
+   "duration_s": 3.28,
+   "first_step_s": 0.95,
+   "llm_calls": 3,
+   "tokens_in": 2025,
+   "tokens_out": 578,
+   "tokens": 2603,
+   "reasoning_tokens": 14,
+   "reserved_max_tokens": 12288,
+   "llm_s": 3.17,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "evals/pr/05-dashboard-cache.diff"
+     },
+     "error": null,
+     "output": "diff --git a/app/views/dashboard.py b/app/views/dashboard.py\nindex 2d7c1e0..8f3a4b6 100644\n--- a/app/views/dashboard.py\n+++ b/app/views/dashboard.py\n@@ -1,9 +1,22 @@\n+import time\n+\n from app.auth import login_required\n from app.orders import recent_orders\n \n+# Dashboard queries are slow at peak; cache rendered data for a minute.\n+_CACHE: dict[str, tuple[float, dict]] = {}\n+_TTL = 60\n+\n \n @login_required\n def dashboard(request):\n-    user = request.user\n-    return {\"name\": user.name, \"balance\": user.account.balance, \"orders\": recent_orders(user)}\n+    key = f\"dashboard:{request.path}\"\n+    hit = _CACHE.get(key)\n+    if hit and time.monotonic() - hit[0] < _TTL:\n+        return hit[1]\n+    user = request.user\n+    data = {\"name\": user.name, \"balance\": user.account.balance, \"orders\": recent_orders(user)}\n+    _CACHE[key] = (time.monotonic(), data)\n+    return data\n",
+     "truncated": false,
+     "ms": 21
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "reviews/pr-owner-repo-05.md",
+      "content": "## Review of PR: Cache dashboard data for 60 seconds\n\n**File:** `app/views/dashboard.py`\n\n### Correctness\n- The caching key uses `request.path` which may include query parameters or user\u2011specific segments, potentially causing cache misses or incorrect sharing of data between users. This could return another user's dashboard data if the path is the same for different users. **[High severity]**\n- The cache is stored in a module\u2011level dictionary without any eviction beyond TTL, which could grow unbounded in a long\u2011running process, leading to memory bloat. **[Medium severity]**\n\n### Security\n- As noted above, using a path\u2011based key without incorporating the authenticated user ID can lead to information leakage across sessions. Sensitive data such as account balance may be exposed to the wrong user. **[High severity]**\n\n### Maintainability\n- The cache implementation is a simple ad\u2011hoc dictionary. Consider using a dedicated caching library (e.g., `functools.lru_cache` or an external cache like Redis) which provides thread\u2011safety, eviction policies, and clearer semantics.\n- No invalidation strategy is present for cases where user data changes (e.g., balance updates). The cached dashboard could become stale until the TTL expires.\n\n**Overall recommendation:** Request changes to address the cache key and potential data leakage, and to adopt a more robust caching approach.\n"
+     },
+     "error": null,
+     "output": "Wrote 1385 characters to reviews/pr-owner-repo-05.md",
+     "truncated": false,
+     "ms": 25
+    }
+   ],
+   "task": "05-dashboard-cache",
+   "suite": "pr",
+   "model": "openai/gpt-oss-120b",
+   "agent": "eval-pr-reviewer",
+   "wall_s": 3.3,
+   "cache_mode": "replay",
+   "live_calls": 3,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "verdict": "request_changes",
+    "issues": 2,
+    "verdict_ok": true,
+    "bug_caught": true,
+    "bug_mentioned": true,
+    "bug_severity": "high"
+   }
+  },
+  "06-format-price": {
+   "run_id": "c5c8165b-fd0d-420c-9dce-3e6dea96c8e4",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "pr": "06-format-price",
+     "issues": [],
+     "verdict": "approve"
+    },
+    "text": "The PR correctly renames the function, adds proper typing and documentation, and preserves backward compatibility with thorough tests. No bugs or security concerns were found, and maintainability is improved.\n\n```json\n{\n  \"pr\": \"06-format-price\",\n  \"verdict\": \"approve\",\n  \"issues\": []\n}\n```"
+   },
+   "duration_s": 2.67,
+   "first_step_s": 0.63,
+   "llm_calls": 3,
+   "tokens_in": 2048,
+   "tokens_out": 404,
+   "tokens": 2452,
+   "reasoning_tokens": 28,
+   "reserved_max_tokens": 12288,
+   "llm_s": 2.52,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "evals/pr/06-format-price.diff"
+     },
+     "error": null,
+     "output": "diff --git a/app/formatting.py b/app/formatting.py\nindex 5a8e2f1..d14b9c7 100644\n--- a/app/formatting.py\n+++ b/app/formatting.py\n@@ -1,2 +1,8 @@\n-def fmt_price(cents):\n-    return \"$%.2f\" % (cents / 100)\n+def format_price(cents: int) -> str:\n+    \"\"\"Format an amount in cents as dollars, e.g. 1999 -> \"$19.99\".\"\"\"\n+    return f\"${cents / 100:.2f}\"\n+\n+\n+# Kept so existing callers keep working; remove once they have migrated.\n+fmt_price = format_price\ndiff --git a/tests/test_formatting.py b/tests/test_formatting.py\nnew file mode 100644\nindex 0000000..3f6a0c2\n--- /dev/null\n+++ b/tests/test_formatting.py\n@@ -0,0 +1,8 @@\n+from app.formatting import fmt_price, format_price\n+\n+\n+def test_format_price():\n+    assert format_price(1999) == \"$19.99\"\n+    assert format_price(5) == \"$0.05\"\n+    assert format_price(0) == \"$0.00\"\n+    assert fmt_price(100) == \"$1.00\"\n",
+     "truncated": false,
+     "ms": 31
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "reviews/pr-06-format-price.md",
+      "content": "### PR Review: Rename fmt_price to format_price\n\n**Files Reviewed:**\n- `app/formatting.py`\n- `tests/test_formatting.py`\n\n#### Correctness Bugs\n- None detected. The new `format_price` correctly formats cents to a dollar string using f\u2011string formatting. The alias `fmt_price = format_price` preserves backward compatibility, and the tests cover typical cases including zero and small amounts.\n\n#### Security Issues\n- No security concerns. The function only performs arithmetic and string formatting on an integer input; there is no external input handling or injection risk.\n\n#### Maintainability\n- The addition of a type hint (`cents: int -> str`) and a docstring improves clarity.\n- Keeping the alias `fmt_price` is a pragmatic step for a smooth migration, but the comment notes it should be removed after callers update. Consider adding a deprecation warning in the future to encourage migration.\n- Tests are added for both the new name and the legacy alias, ensuring regression safety.\n\n**Overall:** The change is correct, safe, and maintains backward compatibility while improving code readability.\n"
+     },
+     "error": null,
+     "output": "Wrote 1103 characters to reviews/pr-06-format-price.md",
+     "truncated": false,
+     "ms": 23
+    }
+   ],
+   "task": "06-format-price",
+   "suite": "pr",
+   "model": "openai/gpt-oss-120b",
+   "agent": "eval-pr-reviewer",
+   "wall_s": 2.7,
+   "cache_mode": "replay",
+   "live_calls": 3,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "verdict": "approve",
+    "issues": 0,
+    "verdict_ok": true,
+    "false_alarms": 0
+   }
+  }
+ }
+}

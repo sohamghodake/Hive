@@ -13,6 +13,8 @@ class AgentState(TypedDict):
     tool_results: list[dict]
     final_output: dict | None
     error: str | None
+    # Timing and retries of the latest model call, set by `think`.
+    call_stats: dict | None
 
     # Per-agent configuration, resolved from the Agent row at run start.
     model: str

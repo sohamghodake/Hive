@@ -1,0 +1,27 @@
+diff --git a/app/views/dashboard.py b/app/views/dashboard.py
+index 2d7c1e0..8f3a4b6 100644
+--- a/app/views/dashboard.py
++++ b/app/views/dashboard.py
+@@ -1,9 +1,22 @@
++import time
++
+ from app.auth import login_required
+ from app.orders import recent_orders
+ 
++# Dashboard queries are slow at peak; cache rendered data for a minute.
++_CACHE: dict[str, tuple[float, dict]] = {}
++_TTL = 60
++
+ 
+ @login_required
+ def dashboard(request):
+-    user = request.user
+-    return {"name": user.name, "balance": user.account.balance, "orders": recent_orders(user)}
++    key = f"dashboard:{request.path}"
++    hit = _CACHE.get(key)
++    if hit and time.monotonic() - hit[0] < _TTL:
++        return hit[1]
++    user = request.user
++    data = {"name": user.name, "balance": user.account.balance, "orders": recent_orders(user)}
++    _CACHE[key] = (time.monotonic(), data)
++    return data

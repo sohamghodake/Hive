@@ -1,0 +1,41 @@
+diff --git a/app/pagination.py b/app/pagination.py
+index 3b1f2c4..9d0e7a1 100644
+--- a/app/pagination.py
++++ b/app/pagination.py
+@@ -1,10 +1,19 @@
+ import math
+ 
+ 
+-def page_count(total_items: int, page_size: int) -> int:
+-    return math.ceil(total_items / page_size)
++def page_count(total_items: int, page_size: int) -> int:
++    """Number of pages needed to show every item."""
++    if page_size <= 0:
++        raise ValueError("page_size must be positive")
++    return total_items // page_size
+ 
+ 
+-def page_slice(items: list, page: int, page_size: int) -> list:
+-    start = (page - 1) * page_size
+-    return items[start:start + page_size]
++def iter_pages(items: list, page_size: int):
++    """Yield (page_number, items_on_page) for every page, 1-indexed."""
++    for page in range(1, page_count(len(items), page_size) + 1):
++        start = (page - 1) * page_size
++        yield page, items[start:start + page_size]
+diff --git a/app/export.py b/app/export.py
+index 71c2d90..a4e81f3 100644
+--- a/app/export.py
++++ b/app/export.py
+@@ -1,12 +1,11 @@
+-from app.pagination import page_count, page_slice
++from app.pagination import iter_pages
+ 
+ 
+ def export_orders(orders, writer, page_size=100):
+-    for page in range(1, page_count(len(orders), page_size) + 1):
+-        for order in page_slice(orders, page, page_size):
+-            writer.write(order.to_csv_row())
++    for _, batch in iter_pages(orders, page_size):
++        writer.write_rows(o.to_csv_row() for o in batch)
+     writer.flush()
