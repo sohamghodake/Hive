@@ -2,12 +2,13 @@ import asyncio
 import json
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from api.dependencies import DBSession
+from api.models.agent import Agent
 from api.models.run import Run, RunStep
 from api.schemas.run import RunCreate, RunDetail, RunOut
 from db.session import _session_factory as session_factory
@@ -17,7 +18,11 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[RunOut])
-async def list_runs(db=DBSession, limit: int = 50, offset: int = 0):
+async def list_runs(
+    db=DBSession,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
     result = await db.execute(
         select(Run).order_by(Run.created_at.desc()).limit(limit).offset(offset)
     )
@@ -26,6 +31,10 @@ async def list_runs(db=DBSession, limit: int = 50, offset: int = 0):
 
 @router.post("", response_model=RunOut, status_code=201)
 async def create_run(body: RunCreate, background: BackgroundTasks, db=DBSession):
+    # Checked up front: otherwise the foreign key fails at commit and the
+    # client gets a 500 for what is a bad request.
+    if await db.get(Agent, body.agent_id) is None:
+        raise HTTPException(404, "Agent not found")
     run = Run(agent_id=body.agent_id, input=body.input, run_metadata=body.run_metadata)
     db.add(run)
     await db.commit()

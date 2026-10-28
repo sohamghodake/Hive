@@ -1,3 +1,4 @@
+import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -5,6 +6,21 @@ from api.dependencies import get_db
 from api.routers import runs as runs_router
 
 MISSING = "00000000-0000-0000-0000-000000000001"
+
+
+async def test_run_for_unknown_agent_is_404_not_500(client: AsyncClient):
+    r = await client.post("/api/runs", json={"agent_id": MISSING, "input": {"task": "x"}})
+    assert r.status_code == 404
+    assert r.json()["detail"] == "Agent not found"
+
+
+@pytest.mark.parametrize("query", ["limit=-1", "limit=0", "limit=201", "offset=-1"])
+async def test_list_runs_rejects_out_of_range_paging(client: AsyncClient, query):
+    assert (await client.get(f"/api/runs?{query}")).status_code == 422
+
+
+async def test_list_runs_accepts_max_page(client: AsyncClient):
+    assert (await client.get("/api/runs?limit=200")).status_code == 200
 
 
 async def test_stream_for_unknown_run_is_404(client: AsyncClient, engine, monkeypatch):

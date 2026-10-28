@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from api.dependencies import DBSession
 from api.models.agent import Agent
@@ -20,7 +21,13 @@ async def list_agents(db=DBSession):
 async def create_agent(body: AgentCreate, db=DBSession):
     agent = Agent(**body.model_dump())
     db.add(agent)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        # The unique index on name is the source of truth; a check-then-insert
+        # would race with a concurrent create of the same name.
+        await db.rollback()
+        raise HTTPException(409, f"An agent named {body.name!r} already exists") from None
     await db.refresh(agent)
     return agent
 

@@ -26,7 +26,7 @@ async def main():
                 "You are a concise assistant. When asked a question, "
                 "answer it directly without using any tools unless necessary."
             ),
-            "model": "kimi-k2.7-code:cloud",
+            # No "model": the API applies LLM_MODEL.
             "tools": ["web_search"],
         })
         if r.status_code == 201:
