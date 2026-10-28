@@ -4,10 +4,12 @@ Measurements of Hive, cheapest first. Results land in `evals/results/`; `python 
 turns them into [RESULTS.md](RESULTS.md).
 
 The commands run in containers on the compose network, as your user so result files stay
-yours. `hive-api-test` is the API image plus pytest:
+yours. `hive-api-test` is the API image plus the dev tools pinned in `uv.lock` (pytest,
+pytest-asyncio, pytest-cov). The image's environment is a uv venv without pip, so they
+go in with uv:
 
 ```bash
-printf 'FROM hive-api\nRUN pip install --no-cache-dir -q pytest pytest-asyncio pytest-cov\n' \
+printf 'FROM hive-api\nRUN --mount=from=ghcr.io/astral-sh/uv:0.13.6,source=/uv,target=/bin/uv uv sync --locked --no-install-project --no-cache\n' \
   | docker build -q -t hive-api-test -
 ```
 

@@ -23,6 +23,7 @@ dependencies = [
     # images must embed with the same fastembed build.
     "fastmcp==4.0.10",
     "fastembed==0.8.1",
+    "numpy>=2.5.3",
     "pypdf>=6.19.0",
     "httpx>=0.28.1",
     "aiofiles>=25.1.0",
