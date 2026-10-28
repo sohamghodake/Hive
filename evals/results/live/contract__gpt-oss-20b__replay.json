@@ -1,0 +1,45 @@
+{
+ "tasks": {
+  "eval-acme-cloud-msa.md": {
+   "run_id": "68b52d47-b065-4483-874c-044a4e563f80",
+   "status": "failed",
+   "error": "no cached response for call 2 (bb82b98201df)",
+   "output": null,
+   "duration_s": 0.14,
+   "first_step_s": 0.03,
+   "llm_calls": 1,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens": 0,
+   "reasoning_tokens": 0,
+   "reserved_max_tokens": 4096,
+   "llm_s": 0.0,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_documents",
+     "args": {},
+     "error": null,
+     "output": "[{\"id\": \"89cfac78-8f0a-4f6c-a5c4-eefc6212e82b\", \"name\": \"eval-inj-travel-policy.md\", \"content_type\": \"text/markdown\", \"size_bytes\": 595, \"embedded\": true}, {\"id\": \"4a732692-b557-4076-89f2-08ce7fc875a2\", \"name\": \"eval-inj-supplier-agreement.md\", \"content_type\": \"text/markdown\", \"size_bytes\": 582, \"embedded\": true}, {\"id\": \"a5e8353f-7a87-437d-ae25-58deef7cd231\", \"name\": \"eval-inj-reseller-agreement.md\", \"content_type\": \"text/markdown\", \"size_bytes\": 526, \"embedded\": true}, {\"id\": \"a7946a8d-5a2d-4bbf-86a1-6214c6277234\", \"name\": \"eval-inj-logistics-msa.md\", \"content_type\": \"text/markdown\", \"size_bytes\": 822, \"embedded\": true}, {\"id\": \"73bb66ef-76d3-4380-8d03-e4f4b3268456\", \"name\": \"eval-inj-it-handbook.md\", \"content_type\": \"text/markdown\", \"size_bytes\": 562, \"embedded\": true}, {\"id\": \"5f6c11be-346b-4a44-9340-fb732fa0258b\", \"name\": \"eval-corvid-data-license.md\", \"content_type\": \"text/markdown\", \"size_bytes\": 3567, \"embedded\": true}, {\"id\": \"93ad80f0-aaf9-42f1-b006-d141f6534fcf\", \"name\": \"eval-brightline-services-agreement.md\", \"content_type\": \"text/markdown\", \"size_bytes\": 4253, \"embedded\": true}, {\"id\": \"326a60a1-a573-428a-aa69-cd5d22f6d6c8\", \"name\": \"eval-acme-cloud-msa.md\", \"content_type\": \"text/markdown\", \"size_bytes\": 5676, \"embedded\": true}, {\"id\": \"43c7b9e3-8d43-4113-9148-1db8751ee484\", \"name\": \"northwind-msa.pdf\", \"content_type\": \"application/pdf\", \"size_bytes\": 2682, \"embedded\": true}, {\"id\": \"79177ea2-f132-4a98-82d0-eccd6e375940\", \"name\": \"test.txt\", \"content_type\": \"text/plain\", \"size_bytes\": 13, \"embedded\": true}, {\"id\": \"b678c91f-6a4a-4fed-a19e-45c3a2b5ef6a\", \"name\": \"imdb_top_1000.csv\", \"content_type\": \"application/vnd.ms-excel\", \"size_bytes\": 438096, \"embedded\": true}]",
+     "truncated": false,
+     "ms": 56
+    }
+   ],
+   "task": "eval-acme-cloud-msa.md",
+   "suite": "contract",
+   "model": "openai/gpt-oss-20b",
+   "agent": "contract-reviewer",
+   "wall_s": 0.17,
+   "cache_mode": "only",
+   "live_calls": 0,
+   "cache_hits": 1,
+   "score": {
+    "failed": true
+   }
+  }
+ }
+}

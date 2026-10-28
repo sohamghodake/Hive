@@ -1,0 +1,1505 @@
+{
+ "tasks": {
+  "agents-with-web-search": {
+   "run_id": "4483505c-32d0-4a7d-b94a-1b4f01b88431",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT name FROM agents WHERE tools @> '[\"web_search\"]'",
+     "answer": "The agents with the web_search tool are code-analyst, data-analyst, research-agent, and market-researcher.",
+     "question": "Which agents are configured with the web_search tool?",
+     "row_count": 4
+    },
+    "text": "The agents that have the **web_search** tool configured are:\n\n- **code-analyst**\n- **data-analyst**\n- **research-agent**\n- **market-researcher**\n\nThese four agents include `\"web_search\"` in their `tools` JSON array.\n\n```json\n{\n  \"question\": \"Which agents are configured with the web_search tool?\",\n  \"sql\": \"SELECT name FROM agents WHERE tools @> '[\\\"web_search\\\"]'\",\n  \"row_count\": 4,\n  \"answer\": \"The agents with the web_search tool are code-analyst, data-analyst, research-agent, and market-researcher.\"\n}\n```"
+   },
+   "duration_s": 5.02,
+   "first_step_s": 1.58,
+   "llm_calls": 6,
+   "tokens_in": 3982,
+   "tokens_out": 439,
+   "tokens": 4421,
+   "reasoning_tokens": 159,
+   "reserved_max_tokens": 24576,
+   "llm_s": 4.61,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 28
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "agents"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"description\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"system_prompt\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"model\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"tools\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"config\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"updated_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 37
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT id, name FROM agents WHERE tools @> '[{\"name\": \"web_search\"}]'"
+     },
+     "error": null,
+     "output": "{\"rows\": [], \"count\": 0, \"truncated\": false}",
+     "truncated": false,
+     "ms": 45
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT id, name, tools FROM agents LIMIT 5"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"id\": \"7727168c-a62c-4bce-90fe-fa8d90cf917c\", \"name\": \"eval-pr-reviewer\", \"tools\": \"[\\\"read_file\\\", \\\"write_file\\\"]\"}, {\"id\": \"d1c20bc4-2f30-4c7e-8adf-30e9679a83ed\", \"name\": \"file-manager\", \"tools\": \"[\\\"read_file\\\", \\\"write_file\\\", \\\"list_files\\\"]\"}, {\"id\": \"39986a3e-2ca2-4a02-b971-a24be98b3468\", \"name\": \"code-analyst\", \"tools\": \"[\\\"read_file\\\", \\\"list_files\\\", \\\"write_file\\\", \\\"web_search\\\"]\"}, {\"id\": \"ec393583-2e49-4fa3-89f8-a04053998809\", \"name\": \"data-analyst\", \"tools\": \"[\\\"query_database\\\", \\\"web_search\\\", \\\"write_file\\\"]\"}, {\"id\": \"f76c9417-482d-476e-aa50-7fbdee899fc0\", \"name\": \"sql-analyst\", \"tools\": \"[\\\"list_tables\\\", \\\"describe_table\\\", \\\"query_database\\\"]\"}], \"count\": 5, \"truncated\": false}",
+     "truncated": false,
+     "ms": 25
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT name FROM agents WHERE tools @> '[\"web_search\"]'"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"name\": \"code-analyst\"}, {\"name\": \"data-analyst\"}, {\"name\": \"research-agent\"}, {\"name\": \"market-researcher\"}], \"count\": 4, \"truncated\": false}",
+     "truncated": false,
+     "ms": 25
+    }
+   ],
+   "task": "agents-with-web-search",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 5.09,
+   "cache_mode": "replay",
+   "live_calls": 6,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "code-analyst"
+     ],
+     [
+      "data-analyst"
+     ],
+     [
+      "market-researcher"
+     ],
+     [
+      "research-agent"
+     ]
+    ],
+    "agent": [
+     [
+      "code-analyst"
+     ],
+     [
+      "data-analyst"
+     ],
+     [
+      "research-agent"
+     ],
+     [
+      "market-researcher"
+     ]
+    ]
+   }
+  },
+  "runs-before-cutoff": {
+   "run_id": "d851f76d-63b5-46bc-9cc7-00682c9452c7",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT COUNT(*) AS run_count FROM runs WHERE created_at < '2026-10-28'",
+     "answer": "35 runs were created before October 28, 2026.",
+     "question": "How many runs were created before October 28, 2026?",
+     "row_count": 1
+    },
+    "text": "The database shows that **35 runs** were created before October\u202f28\u202f2026.\n\n```json\n{\n  \"question\": \"How many runs were created before October 28, 2026?\",\n  \"sql\": \"SELECT COUNT(*) AS run_count FROM runs WHERE created_at < '2026-10-28'\",\n  \"row_count\": 1,\n  \"answer\": \"35 runs were created before October 28, 2026.\"\n}\n```"
+   },
+   "duration_s": 3.15,
+   "first_step_s": 0.44,
+   "llm_calls": 4,
+   "tokens_in": 2020,
+   "tokens_out": 215,
+   "tokens": 2235,
+   "reasoning_tokens": 34,
+   "reserved_max_tokens": 16384,
+   "llm_s": 2.86,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 53
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 49
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT COUNT(*) AS run_count FROM runs WHERE created_at < '2026-10-28'"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"run_count\": 35}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 40
+    }
+   ],
+   "task": "runs-before-cutoff",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 3.17,
+   "cache_mode": "replay",
+   "live_calls": 4,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "35"
+     ]
+    ],
+    "agent": [
+     [
+      "35"
+     ]
+    ]
+   }
+  },
+  "failed-runs": {
+   "run_id": "e5ff7459-73ff-4013-9189-d25c1b2ac948",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT COUNT(*) AS cnt FROM runs WHERE created_at < '2026-10-28' AND status = 'failed';",
+     "answer": "16 runs",
+     "question": "How many runs created before October 28, 2026 ended with status failed?",
+     "row_count": 1
+    },
+    "text": "The database shows that **16 runs** were created before\u202fOctober\u202f28\u202f2026 and have a status of **failed**.\n\n```json\n{\n  \"question\": \"How many runs created before October 28, 2026 ended with status failed?\",\n  \"sql\": \"SELECT COUNT(*) AS cnt FROM runs WHERE created_at < '2026-10-28' AND status = 'failed';\",\n  \"row_count\": 1,\n  \"answer\": \"16 runs\"\n}\n```"
+   },
+   "duration_s": 6.1,
+   "first_step_s": 0.65,
+   "llm_calls": 4,
+   "tokens_in": 2036,
+   "tokens_out": 239,
+   "tokens": 2275,
+   "reasoning_tokens": 45,
+   "reserved_max_tokens": 16384,
+   "llm_s": 5.87,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 42
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 35
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT COUNT(*) AS cnt FROM runs WHERE created_at < '2026-10-28' AND status = 'failed';"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"cnt\": 16}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 31
+    }
+   ],
+   "task": "failed-runs",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 6.14,
+   "cache_mode": "replay",
+   "live_calls": 4,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "16"
+     ]
+    ],
+    "agent": [
+     [
+      "16"
+     ]
+    ]
+   }
+  },
+  "most-called-tool": {
+   "run_id": "eae2f21e-5f72-4451-b89b-e8fe14663db7",
+   "status": "failed",
+   "error": "Error code: 400 - {'error': {'message': \"Tool call validation failed: tool call validation failed: attempted to call tool 'repo_query_database' which was not in request.tools\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'failed_generation': '{\"name\": \"repo_query_database\", \"arguments\": {\\n  \"sql\": \"SELECT tool_name, COUNT(*) AS cnt FROM tool_calls WHERE called_at < \\'2026-10-28\\' GROUP BY tool_name ORDER BY cnt DESC LIMIT 1;\"\\n}}'}}",
+   "output": null,
+   "duration_s": 0.73,
+   "first_step_s": 0.4,
+   "llm_calls": 2,
+   "tokens_in": 710,
+   "tokens_out": 66,
+   "tokens": 776,
+   "reasoning_tokens": 23,
+   "reserved_max_tokens": 8192,
+   "llm_s": 0.88,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 24
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "tool_calls"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"run_id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"step_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"tool_name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"mcp_server\", \"data_type\": \"character varying\", \"is_nullable\": \"YES\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"duration_ms\", \"data_type\": \"integer\", \"is_nullable\": \"YES\"}, {\"column_name\": \"called_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 40
+    }
+   ],
+   "task": "most-called-tool",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 1.86,
+   "cache_mode": "replay",
+   "live_calls": 2,
+   "cache_hits": 0,
+   "score": {
+    "failed": true
+   }
+  },
+  "avg-duration-per-server": {
+   "run_id": "69ab62d7-6f05-4a3c-a2c2-c5274eb31191",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT mcp_server, AVG(duration_ms)::numeric AS avg_duration_ms\nFROM tool_calls\nWHERE called_at < '2026-10-28'::date\nGROUP BY mcp_server\nORDER BY mcp_server;",
+     "answer": "mcp-api: 827 ms, mcp-db: 169.67 ms, mcp-file: 267 ms",
+     "question": "What was the average tool-call duration in milliseconds for each MCP server, for calls made before October 28, 2026?",
+     "row_count": 4
+    },
+    "text": "The average tool\u2011call duration for each MCP server (in milliseconds) for calls made before\u202fOctober\u202f28\u202f2026 is:\n\n- **mcp-api**:\u202f827\u202fms  \n- **mcp-db**:\u202f\u2248\u202f169.67\u202fms  \n- **mcp-file**:\u202f267\u202fms  \n\n(There is also a row with a null `mcp_server` and null average, which we can ignore.)\n\n```json\n{\n  \"question\": \"What was the average tool-call duration in milliseconds for each MCP server, for calls made before October 28, 2026?\",\n  \"sql\": \"SELECT mcp_server, AVG(duration_ms)::numeric AS avg_duration_ms\\nFROM tool_calls\\nWHERE called_at < '2026-10-28'::date\\nGROUP BY mcp_server\\nORDER BY mcp_server;\",\n  \"row_count\": 4,\n  \"answer\": \"mcp-api: 827 ms, mcp-db: 169.67 ms, mcp-file: 267 ms\"\n}\n```"
+   },
+   "duration_s": 3.95,
+   "first_step_s": 0.42,
+   "llm_calls": 4,
+   "tokens_in": 2172,
+   "tokens_out": 397,
+   "tokens": 2569,
+   "reasoning_tokens": 69,
+   "reserved_max_tokens": 16384,
+   "llm_s": 3.75,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 25
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "tool_calls"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"run_id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"step_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"tool_name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"mcp_server\", \"data_type\": \"character varying\", \"is_nullable\": \"YES\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"duration_ms\", \"data_type\": \"integer\", \"is_nullable\": \"YES\"}, {\"column_name\": \"called_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 32
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT mcp_server, AVG(duration_ms)::numeric AS avg_duration_ms\nFROM tool_calls\nWHERE called_at < '2026-10-28'::date\nGROUP BY mcp_server\nORDER BY mcp_server;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"mcp_server\": \"mcp-api\", \"avg_duration_ms\": \"827.0000000000000000\"}, {\"mcp_server\": \"mcp-db\", \"avg_duration_ms\": \"169.6666666666666667\"}, {\"mcp_server\": \"mcp-file\", \"avg_duration_ms\": \"267.0000000000000000\"}, {\"mcp_server\": null, \"avg_duration_ms\": null}], \"count\": 4, \"truncated\": false}",
+     "truncated": false,
+     "ms": 37
+    }
+   ],
+   "task": "avg-duration-per-server",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 4.0,
+   "cache_mode": "replay",
+   "live_calls": 4,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": false,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "mcp-api",
+      "827"
+     ],
+     [
+      "mcp-db",
+      "170"
+     ],
+     [
+      "mcp-file",
+      "267"
+     ]
+    ],
+    "agent": [
+     [
+      "mcp-api",
+      "827.0000000000000000"
+     ],
+     [
+      "mcp-db",
+      "169.6666666666666667"
+     ],
+     [
+      "mcp-file",
+      "267.0000000000000000"
+     ],
+     [
+      "None",
+      "None"
+     ]
+    ]
+   }
+  },
+  "agent-most-failures": {
+   "run_id": "5811c570-d549-4489-9e31-94484d9da57f",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT a.name, COUNT(r.id) AS failed_count\nFROM runs r\nJOIN agents a ON r.agent_id = a.id\nWHERE r.status = 'failed' AND r.finished_at < '2026-10-28'\nGROUP BY a.name\nORDER BY failed_count DESC\nLIMIT 1;",
+     "answer": "research-agent had the most failed runs, with a total of 7.",
+     "question": "Which agent had the most failed runs before October 28, 2026, and how many?",
+     "row_count": 1
+    },
+    "text": "The agent with the most failed runs before October\u202f28\u202f2026 is **research-agent**, which had **7 failed runs**.\n\n```json\n{\n  \"question\": \"Which agent had the most failed runs before October 28, 2026, and how many?\",\n  \"sql\": \"SELECT a.name, COUNT(r.id) AS failed_count\\nFROM runs r\\nJOIN agents a ON r.agent_id = a.id\\nWHERE r.status = 'failed' AND r.finished_at < '2026-10-28'\\nGROUP BY a.name\\nORDER BY failed_count DESC\\nLIMIT 1;\",\n  \"row_count\": 1,\n  \"answer\": \"research-agent had the most failed runs, with a total of 7.\"\n}\n```"
+   },
+   "duration_s": 4.47,
+   "first_step_s": 0.41,
+   "llm_calls": 5,
+   "tokens_in": 3165,
+   "tokens_out": 388,
+   "tokens": 3553,
+   "reasoning_tokens": 81,
+   "reserved_max_tokens": 20480,
+   "llm_s": 4.2,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 25
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "agents"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"description\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"system_prompt\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"model\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"tools\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"config\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"updated_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 43
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 24
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT a.name, COUNT(r.id) AS failed_count\nFROM runs r\nJOIN agents a ON r.agent_id = a.id\nWHERE r.status = 'failed' AND r.finished_at < '2026-10-28'\nGROUP BY a.name\nORDER BY failed_count DESC\nLIMIT 1;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"name\": \"research-agent\", \"failed_count\": 7}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 30
+    }
+   ],
+   "task": "agent-most-failures",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 4.5,
+   "cache_mode": "replay",
+   "live_calls": 5,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "research-agent",
+      "7"
+     ]
+    ],
+    "agent": [
+     [
+      "research-agent",
+      "7"
+     ]
+    ]
+   }
+  },
+  "completion-rate-per-agent": {
+   "run_id": "dbfc0d3f-204a-40e0-8dd7-82c746910c7d",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT a.id AS agent_id, a.name, COUNT(r.id) AS total_runs,\n       SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) AS completed_runs,\n       ROUND(100.0 * SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) / NULLIF(COUNT(r.id),0), 2) AS percent_completed\nFROM agents a\nJOIN runs r ON r.agent_id = a.id\nWHERE r.created_at < TIMESTAMP WITH TIME ZONE '2026-10-28 00:00:00+00'\nGROUP BY a.id, a.name\nHAVING COUNT(r.id) > 0\nORDER BY a.name;",
+     "answer": "contract-reviewer: 100%, data-analyst: 0%, file-manager: 100%, market-researcher: 40%, pr-reviewer: 100%, research-agent: 41.67%, sql-analyst: 100%.",
+     "question": "For each agent that has runs created before October 28, 2026, what percentage of those runs completed?",
+     "row_count": 7
+    },
+    "text": "The query shows each agent that had runs created before\u202f2026\u201110\u201128 and the percentage of those runs that reached the **completed** status:\n\n- contract\u2011reviewer:\u202f100\u202f% (1 of 1 runs)\n- data\u2011analyst:\u202f0\u202f% (0 of 1 runs)\n- file\u2011manager:\u202f100\u202f% (3 of 3 runs)\n- market\u2011researcher:\u202f40\u202f% (4 of 10 runs)\n- pr\u2011reviewer:\u202f100\u202f% (3 of 3 runs)\n- research\u2011agent:\u202f41.67\u202f% (5 of 12 runs)\n- sql\u2011analyst:\u202f100\u202f% (1 of 1 runs)\n\n**Answer:** For each agent with runs created before October\u202f28\u202f2026, the percentages of completed runs are as listed above.\n\n```json\n{\n  \"question\": \"For each agent that has runs created before October 28, 2026, what percentage of those runs completed?\",\n  \"sql\": \"SELECT a.id AS agent_id, a.name, COUNT(r.id) AS total_runs,\\n       SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) AS completed_runs,\\n       ROUND(100.0 * SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) / NULLIF(COUNT(r.id),0), 2) AS percent_completed\\nFROM agents a\\nJOIN runs r ON r.agent_id = a.id\\nWHERE r.created_at < TIMESTAMP WITH TIME ZONE '2026-10-28 00:00:00+00'\\nGROUP BY a.id, a.name\\nHAVING COUNT(r.id) > 0\\nORDER BY a.name;\",\n  \"row_count\": 7,\n  \"answer\": \"contract-reviewer: 100%, data-analyst: 0%, file-manager: 100%, market-researcher: 40%, pr-reviewer: 100%, research-agent: 41.67%, sql-analyst: 100%.\"\n}\n```"
+   },
+   "duration_s": 5.53,
+   "first_step_s": 0.72,
+   "llm_calls": 5,
+   "tokens_in": 3673,
+   "tokens_out": 824,
+   "tokens": 4497,
+   "reasoning_tokens": 148,
+   "reserved_max_tokens": 20480,
+   "llm_s": 5.08,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 121
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "agents"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"description\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"system_prompt\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"model\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"tools\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"config\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"updated_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 33
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 52
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT a.id AS agent_id, a.name, COUNT(r.id) AS total_runs,\n       SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) AS completed_runs,\n       ROUND(100.0 * SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) / NULLIF(COUNT(r.id),0), 2) AS percent_completed\nFROM agents a\nJOIN runs r ON r.agent_id = a.id\nWHERE r.created_at < TIMESTAMP WITH TIME ZONE '2026-10-28 00:00:00+00'\nGROUP BY a.id, a.name\nHAVING COUNT(r.id) > 0\nORDER BY a.name;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"agent_id\": \"bda3bc8e-ca8d-414d-a533-5e18fb414f01\", \"name\": \"contract-reviewer\", \"total_runs\": 1, \"completed_runs\": 1, \"percent_completed\": \"100.00\"}, {\"agent_id\": \"ec393583-2e49-4fa3-89f8-a04053998809\", \"name\": \"data-analyst\", \"total_runs\": 1, \"completed_runs\": 0, \"percent_completed\": \"0.00\"}, {\"agent_id\": \"d1c20bc4-2f30-4c7e-8adf-30e9679a83ed\", \"name\": \"file-manager\", \"total_runs\": 3, \"completed_runs\": 3, \"percent_completed\": \"100.00\"}, {\"agent_id\": \"5fa2159f-d03a-4d5c-a656-1edead52b9c5\", \"name\": \"market-researcher\", \"total_runs\": 10, \"completed_runs\": 4, \"percent_completed\": \"40.00\"}, {\"agent_id\": \"7fac2301-fa86-488c-8e71-c96cfca57e7a\", \"name\": \"pr-reviewer\", \"total_runs\": 3, \"completed_runs\": 3, \"percent_completed\": \"100.00\"}, {\"agent_id\": \"418db7e5-b70c-498c-abf4-c1f74b9d9ce8\", \"name\": \"research-agent\", \"total_runs\": 12, \"completed_runs\": 5, \"percent_completed\": \"41.67\"}, {\"agent_id\": \"f76c9417-482d-476e-aa50-7fbdee899fc0\", \"name\": \"sql-analyst\", \"total_runs\": 1, \"completed_runs\": 1, \"percent_completed\": \"100.00\"}], \"count\": 7, \"truncated\": false}",
+     "truncated": false,
+     "ms": 37
+    }
+   ],
+   "task": "completion-rate-per-agent",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 5.56,
+   "cache_mode": "replay",
+   "live_calls": 5,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "contract-reviewer",
+      "100.0"
+     ],
+     [
+      "data-analyst",
+      "0.0"
+     ],
+     [
+      "file-manager",
+      "100.0"
+     ],
+     [
+      "market-researcher",
+      "40.0"
+     ],
+     [
+      "pr-reviewer",
+      "100.0"
+     ],
+     [
+      "research-agent",
+      "41.7"
+     ],
+     [
+      "sql-analyst",
+      "100.0"
+     ]
+    ],
+    "agent": [
+     [
+      "bda3bc8e-ca8d-414d-a533-5e18fb414f01",
+      "contract-reviewer",
+      "1",
+      "1",
+      "100.00"
+     ],
+     [
+      "ec393583-2e49-4fa3-89f8-a04053998809",
+      "data-analyst",
+      "1",
+      "0",
+      "0.00"
+     ],
+     [
+      "d1c20bc4-2f30-4c7e-8adf-30e9679a83ed",
+      "file-manager",
+      "3",
+      "3",
+      "100.00"
+     ],
+     [
+      "5fa2159f-d03a-4d5c-a656-1edead52b9c5",
+      "market-researcher",
+      "10",
+      "4",
+      "40.00"
+     ],
+     [
+      "7fac2301-fa86-488c-8e71-c96cfca57e7a",
+      "pr-reviewer",
+      "3",
+      "3",
+      "100.00"
+     ],
+     [
+      "418db7e5-b70c-498c-abf4-c1f74b9d9ce8",
+      "research-agent",
+      "12",
+      "5",
+      "41.67"
+     ],
+     [
+      "f76c9417-482d-476e-aa50-7fbdee899fc0",
+      "sql-analyst",
+      "1",
+      "1",
+      "100.00"
+     ]
+    ]
+   }
+  },
+  "avg-steps-completed": {
+   "run_id": "7b9e23c8-f6fc-40f2-8d5f-a787bddc38e0",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT AVG(step_count)::numeric(10,2) AS avg_steps\nFROM (\n  SELECT r.id, COUNT(s.id) AS step_count\n  FROM runs r\n  JOIN steps s ON s.run_id = r.id\n  WHERE r.status = 'completed'\n    AND r.created_at < '2026-10-28'\n  GROUP BY r.id\n) sub;",
+     "answer": "2.89",
+     "question": "On average, how many steps did completed runs created before October 28, 2026 have? Only count runs that have at least one step.",
+     "row_count": 1
+    },
+    "text": "The average number of steps for completed runs created before\u202fOctober\u202f28\u202f2026 (and that have at least one step) is **2.89** steps.\n\n```json\n{\n  \"question\": \"On average, how many steps did completed runs created before October 28, 2026 have? Only count runs that have at least one step.\",\n  \"sql\": \"SELECT AVG(step_count)::numeric(10,2) AS avg_steps\\nFROM (\\n  SELECT r.id, COUNT(s.id) AS step_count\\n  FROM runs r\\n  JOIN steps s ON s.run_id = r.id\\n  WHERE r.status = 'completed'\\n    AND r.created_at < '2026-10-28'\\n  GROUP BY r.id\\n) sub;\",\n  \"row_count\": 1,\n  \"answer\": \"2.89\"\n}\n```"
+   },
+   "duration_s": 6.07,
+   "first_step_s": 0.58,
+   "llm_calls": 5,
+   "tokens_in": 3254,
+   "tokens_out": 524,
+   "tokens": 3778,
+   "reasoning_tokens": 173,
+   "reserved_max_tokens": 20480,
+   "llm_s": 5.36,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 38
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 85
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "steps"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"run_id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"sequence\", \"data_type\": \"integer\", \"is_nullable\": \"NO\"}, {\"column_name\": \"node\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 39
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT AVG(step_count)::numeric(10,2) AS avg_steps\nFROM (\n  SELECT r.id, COUNT(s.id) AS step_count\n  FROM runs r\n  JOIN steps s ON s.run_id = r.id\n  WHERE r.status = 'completed'\n    AND r.created_at < '2026-10-28'\n  GROUP BY r.id\n) sub;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"avg_steps\": \"2.89\"}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 203
+    }
+   ],
+   "task": "avg-steps-completed",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 6.1,
+   "cache_mode": "replay",
+   "live_calls": 5,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "2.89"
+     ]
+    ],
+    "agent": [
+     [
+      "2.89"
+     ]
+    ]
+   }
+  },
+  "doc-most-chunks": {
+   "run_id": "b1510f71-f231-402a-a9bb-d3f53392a92d",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT d.name, COUNT(e.id) AS chunk_count\nFROM documents d\nJOIN embeddings e ON d.id = e.document_id\nGROUP BY d.id, d.name\nORDER BY chunk_count DESC\nLIMIT 1;",
+     "answer": "The document \"imdb_top_1000.csv\" has the most embedding chunks, with 586 chunks.",
+     "question": "Which document has the most embedding chunks, and how many chunks does it have?",
+     "row_count": 1
+    },
+    "text": "The document **\u201cimdb_top_1000.csv\u201d** has the most embedding chunks, with **586 chunks**.\n\n```json\n{\n  \"question\": \"Which document has the most embedding chunks, and how many chunks does it have?\",\n  \"sql\": \"SELECT d.name, COUNT(e.id) AS chunk_count\\nFROM documents d\\nJOIN embeddings e ON d.id = e.document_id\\nGROUP BY d.id, d.name\\nORDER BY chunk_count DESC\\nLIMIT 1;\",\n  \"row_count\": 1,\n  \"answer\": \"The document \\\"imdb_top_1000.csv\\\" has the most embedding chunks, with 586 chunks.\"\n}\n```"
+   },
+   "duration_s": 4.76,
+   "first_step_s": 0.61,
+   "llm_calls": 5,
+   "tokens_in": 2953,
+   "tokens_out": 345,
+   "tokens": 3298,
+   "reasoning_tokens": 69,
+   "reserved_max_tokens": 20480,
+   "llm_s": 4.52,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 29
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "documents"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"content\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"content_type\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"size_bytes\", \"data_type\": \"integer\", \"is_nullable\": \"YES\"}, {\"column_name\": \"doc_metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"embedded\", \"data_type\": \"boolean\", \"is_nullable\": \"NO\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"updated_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 25
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "embeddings"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"document_id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"chunk_index\", \"data_type\": \"integer\", \"is_nullable\": \"NO\"}, {\"column_name\": \"chunk_text\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"embedding\", \"data_type\": \"USER-DEFINED\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 26
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT d.name, COUNT(e.id) AS chunk_count\nFROM documents d\nJOIN embeddings e ON d.id = e.document_id\nGROUP BY d.id, d.name\nORDER BY chunk_count DESC\nLIMIT 1;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"name\": \"imdb_top_1000.csv\", \"chunk_count\": 586}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 30
+    }
+   ],
+   "task": "doc-most-chunks",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 4.79,
+   "cache_mode": "replay",
+   "live_calls": 5,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "imdb_top_1000.csv",
+      "586"
+     ]
+    ],
+    "agent": [
+     [
+      "imdb_top_1000.csv",
+      "586"
+     ]
+    ]
+   }
+  },
+  "pr-reviewer-distinct-tools": {
+   "run_id": "a7c6ea54-c0be-4d57-95e5-2e54b637f6f2",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT COUNT(DISTINCT tc.tool_name) AS distinct_tools\nFROM runs r\nJOIN tool_calls tc ON tc.run_id = r.id\nWHERE r.created_at < '2026-10-28'::date\n  AND r.metadata->>'agent' = 'pr-reviewer';",
+     "answer": "0 distinct tools were called by pr-reviewer runs created before October 28, 2026.",
+     "question": "How many distinct tools were called by pr-reviewer runs created before October 28, 2026?",
+     "row_count": 1
+    },
+    "text": "The query finds that **0 distinct tools** were called by `pr-reviewer` runs created before October\u202f28\u202f2026.\n\n```json\n{\n  \"question\": \"How many distinct tools were called by pr-reviewer runs created before October 28, 2026?\",\n  \"sql\": \"SELECT COUNT(DISTINCT tc.tool_name) AS distinct_tools\\nFROM runs r\\nJOIN tool_calls tc ON tc.run_id = r.id\\nWHERE r.created_at < '2026-10-28'::date\\n  AND r.metadata->>'agent' = 'pr-reviewer';\",\n  \"row_count\": 1,\n  \"answer\": \"0 distinct tools were called by pr-reviewer runs created before October 28, 2026.\"\n}\n```"
+   },
+   "duration_s": 3.54,
+   "first_step_s": 0.85,
+   "llm_calls": 5,
+   "tokens_in": 3230,
+   "tokens_out": 452,
+   "tokens": 3682,
+   "reasoning_tokens": 140,
+   "reserved_max_tokens": 20480,
+   "llm_s": 4.34,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 24
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 37
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT COUNT(DISTINCT tc.tool_name) AS distinct_tools\nFROM runs r\nJOIN tool_calls tc ON tc.run_id = r.id\nWHERE r.created_at < '2026-10-28'::date\n  AND r.metadata->>'agent' = 'pr-reviewer';"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"distinct_tools\": 0}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 28
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "tool_calls"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"run_id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"step_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"tool_name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"mcp_server\", \"data_type\": \"character varying\", \"is_nullable\": \"YES\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"duration_ms\", \"data_type\": \"integer\", \"is_nullable\": \"YES\"}, {\"column_name\": \"called_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 55
+    }
+   ],
+   "task": "pr-reviewer-distinct-tools",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 4.66,
+   "cache_mode": "replay",
+   "live_calls": 5,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": false,
+    "answer_match": false,
+    "agent_error": null,
+    "gold": [
+     [
+      "2"
+     ]
+    ],
+    "agent": [
+     [
+      "0"
+     ]
+    ]
+   }
+  },
+  "longest-run": {
+   "run_id": "4f93df21-b456-47d7-89ce-fcf68c789eab",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT a.name AS agent_name, r.id AS run_id,\n       EXTRACT(EPOCH FROM (r.finished_at - r.started_at)) AS duration_seconds\nFROM runs r\nJOIN agents a ON r.agent_id = a.id\nWHERE r.created_at < '2026-10-28'::date\n  AND r.started_at IS NOT NULL AND r.finished_at IS NOT NULL\nORDER BY duration_seconds DESC\nLIMIT 1",
+     "answer": "The longest run was by agent 'market-researcher' with a duration of 112.33 seconds.",
+     "question": "Among runs created before October 28, 2026, which one took the longest from start to finish? Give its agent name and its duration in seconds.",
+     "row_count": 1
+    },
+    "text": "The longest run created before October\u202f28\u202f2026 was executed by the **market\u2011researcher** agent and lasted **112.33 seconds**.\n\n```json\n{\n  \"question\": \"Among runs created before October 28, 2026, which one took the longest from start to finish? Give its agent name and its duration in seconds.\",\n  \"sql\": \"SELECT a.name AS agent_name, r.id AS run_id,\\n       EXTRACT(EPOCH FROM (r.finished_at - r.started_at)) AS duration_seconds\\nFROM runs r\\nJOIN agents a ON r.agent_id = a.id\\nWHERE r.created_at < '2026-10-28'::date\\n  AND r.started_at IS NOT NULL AND r.finished_at IS NOT NULL\\nORDER BY duration_seconds DESC\\nLIMIT 1\",\n  \"row_count\": 1,\n  \"answer\": \"The longest run was by agent 'market-researcher' with a duration of 112.33 seconds.\"\n}\n```"
+   },
+   "duration_s": 4.6,
+   "first_step_s": 0.71,
+   "llm_calls": 5,
+   "tokens_in": 3311,
+   "tokens_out": 505,
+   "tokens": 3816,
+   "reasoning_tokens": 120,
+   "reserved_max_tokens": 20480,
+   "llm_s": 4.26,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 34
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 36
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "agents"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"description\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"system_prompt\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"model\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"tools\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"config\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"updated_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 34
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT a.name AS agent_name, r.id AS run_id,\n       EXTRACT(EPOCH FROM (r.finished_at - r.started_at)) AS duration_seconds\nFROM runs r\nJOIN agents a ON r.agent_id = a.id\nWHERE r.created_at < '2026-10-28'::date\n  AND r.started_at IS NOT NULL AND r.finished_at IS NOT NULL\nORDER BY duration_seconds DESC\nLIMIT 1"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"agent_name\": \"market-researcher\", \"run_id\": \"d94aac72-4164-4b59-93e9-d31c76757e86\", \"duration_seconds\": \"112.334075\"}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 39
+    }
+   ],
+   "task": "longest-run",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 4.63,
+   "cache_mode": "replay",
+   "live_calls": 5,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "market-researcher",
+      "112.3"
+     ]
+    ],
+    "agent": [
+     [
+      "market-researcher",
+      "d94aac72-4164-4b59-93e9-d31c76757e86",
+      "112.334075"
+     ]
+    ]
+   }
+  },
+  "tokens-per-agent": {
+   "run_id": "194448c9-3b70-4faa-93b8-f06d6885d25a",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT a.name AS agent_name,\n       SUM((s.output->'usage'->>'total_tokens')::bigint) AS total_tokens\nFROM agents a\nJOIN runs r ON r.agent_id = a.id\nJOIN steps s ON s.run_id = r.id\nWHERE r.created_at < '2026-10-28'\n  AND s.node = 'think'\n  AND s.output->'usage'->>'total_tokens' IS NOT NULL\nGROUP BY a.name\nORDER BY a.name;",
+     "answer": "pr-reviewer used 9,154 total tokens.",
+     "question": "How many total tokens did each agent use in runs created before October 28, 2026? Token usage is recorded on think steps in steps.output under usage.total_tokens.",
+     "row_count": 1
+    },
+    "text": "The agent **pr\u2011reviewer** used a total of **9,154 tokens** in all runs that were created before October\u202f28\u202f2026 (summing the `usage.total_tokens` from the \u201cthink\u201d steps).\n\n```json\n{\n  \"question\": \"How many total tokens did each agent use in runs created before October 28, 2026? Token usage is recorded on think steps in steps.output under usage.total_tokens.\",\n  \"sql\": \"SELECT a.name AS agent_name,\\n       SUM((s.output->'usage'->>'total_tokens')::bigint) AS total_tokens\\nFROM agents a\\nJOIN runs r ON r.agent_id = a.id\\nJOIN steps s ON s.run_id = r.id\\nWHERE r.created_at < '2026-10-28'\\n  AND s.node = 'think'\\n  AND s.output->'usage'->>'total_tokens' IS NOT NULL\\nGROUP BY a.name\\nORDER BY a.name;\",\n  \"row_count\": 1,\n  \"answer\": \"pr-reviewer used 9,154 total tokens.\"\n}\n```"
+   },
+   "duration_s": 5.58,
+   "first_step_s": 0.51,
+   "llm_calls": 6,
+   "tokens_in": 4629,
+   "tokens_out": 706,
+   "tokens": 5335,
+   "reasoning_tokens": 257,
+   "reserved_max_tokens": 24576,
+   "llm_s": 5.1,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 37
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "steps"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"run_id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"sequence\", \"data_type\": \"integer\", \"is_nullable\": \"NO\"}, {\"column_name\": \"node\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 38
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 28
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "agents"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"description\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"system_prompt\", \"data_type\": \"text\", \"is_nullable\": \"NO\"}, {\"column_name\": \"model\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"tools\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"config\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"updated_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 42
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT a.name AS agent_name,\n       SUM((s.output->'usage'->>'total_tokens')::bigint) AS total_tokens\nFROM agents a\nJOIN runs r ON r.agent_id = a.id\nJOIN steps s ON s.run_id = r.id\nWHERE r.created_at < '2026-10-28'\n  AND s.node = 'think'\n  AND s.output->'usage'->>'total_tokens' IS NOT NULL\nGROUP BY a.name\nORDER BY a.name;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"agent_name\": \"pr-reviewer\", \"total_tokens\": \"9154\"}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 31
+    }
+   ],
+   "task": "tokens-per-agent",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 5.67,
+   "cache_mode": "replay",
+   "live_calls": 6,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "pr-reviewer",
+      "9154"
+     ]
+    ],
+    "agent": [
+     [
+      "pr-reviewer",
+      "9154"
+     ]
+    ]
+   }
+  },
+  "busiest-day": {
+   "run_id": "b51f409c-cb29-47ad-bf9a-3c3a244ebb48",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT created_at::date AS day_utc, COUNT(*) AS run_count\nFROM runs\nWHERE created_at < '2026-10-28'::date\nGROUP BY day_utc\nORDER BY run_count DESC\nLIMIT 1;",
+     "answer": "The day with the most runs was 2026-07-12, with 11 runs created.",
+     "question": "On which day (UTC) were the most runs created before October 28, 2026, and how many runs were created that day?",
+     "row_count": 1
+    },
+    "text": "The day with the highest number of runs created before\u202f2026\u201110\u201128\u202fUTC was **2026\u201107\u201112**, with **11 runs** created on that day.\n\n```json\n{\n  \"question\": \"On which day (UTC) were the most runs created before October 28, 2026, and how many runs were created that day?\",\n  \"sql\": \"SELECT created_at::date AS day_utc, COUNT(*) AS run_count\\nFROM runs\\nWHERE created_at < '2026-10-28'::date\\nGROUP BY day_utc\\nORDER BY run_count DESC\\nLIMIT 1;\",\n  \"row_count\": 1,\n  \"answer\": \"The day with the most runs was 2026-07-12, with 11 runs created.\"\n}\n```"
+   },
+   "duration_s": 3.95,
+   "first_step_s": 0.42,
+   "llm_calls": 4,
+   "tokens_in": 2123,
+   "tokens_out": 353,
+   "tokens": 2476,
+   "reasoning_tokens": 64,
+   "reserved_max_tokens": 16384,
+   "llm_s": 3.73,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 26
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 31
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT created_at::date AS day_utc, COUNT(*) AS run_count\nFROM runs\nWHERE created_at < '2026-10-28'::date\nGROUP BY day_utc\nORDER BY run_count DESC\nLIMIT 1;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"day_utc\": \"2026-07-12\", \"run_count\": 11}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 25
+    }
+   ],
+   "task": "busiest-day",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 3.98,
+   "cache_mode": "replay",
+   "live_calls": 4,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "2026-07-12",
+      "11"
+     ]
+    ],
+    "agent": [
+     [
+      "2026-07-12",
+      "11"
+     ]
+    ]
+   }
+  },
+  "failed-tool-calls": {
+   "run_id": "06fb4544-9a76-4742-88fc-d384f972e52e",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT tool_name, COUNT(*) AS errored_calls\nFROM tool_calls\nWHERE error IS NOT NULL\n  AND called_at < '2026-10-28'\nGROUP BY tool_name\nORDER BY errored_calls DESC;",
+     "answer": "The web_search tool had 1 errored call before October 28, 2026.",
+     "question": "Which tools had calls that returned an error before October 28, 2026, and how many errored calls did each have?",
+     "row_count": 1
+    },
+    "text": "The tool **web_search** had calls that returned an error before October\u202f28\u202f2026, with **1** errored call.\n\n```json\n{\n  \"question\": \"Which tools had calls that returned an error before October 28, 2026, and how many errored calls did each have?\",\n  \"sql\": \"SELECT tool_name, COUNT(*) AS errored_calls\\nFROM tool_calls\\nWHERE error IS NOT NULL\\n  AND called_at < '2026-10-28'\\nGROUP BY tool_name\\nORDER BY errored_calls DESC;\",\n  \"row_count\": 1,\n  \"answer\": \"The web_search tool had 1 errored call before October 28, 2026.\"\n}\n```"
+   },
+   "duration_s": 5.96,
+   "first_step_s": 0.85,
+   "llm_calls": 5,
+   "tokens_in": 3255,
+   "tokens_out": 422,
+   "tokens": 3677,
+   "reasoning_tokens": 131,
+   "reserved_max_tokens": 20480,
+   "llm_s": 5.67,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 35
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "tool_calls"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"run_id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"step_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"tool_name\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"mcp_server\", \"data_type\": \"character varying\", \"is_nullable\": \"YES\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"duration_ms\", \"data_type\": \"integer\", \"is_nullable\": \"YES\"}, {\"column_name\": \"called_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 31
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 28
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT tool_name, COUNT(*) AS errored_calls\nFROM tool_calls\nWHERE error IS NOT NULL\n  AND called_at < '2026-10-28'\nGROUP BY tool_name\nORDER BY errored_calls DESC;"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"tool_name\": \"web_search\", \"errored_calls\": 1}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 32
+    }
+   ],
+   "task": "failed-tool-calls",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 6.0,
+   "cache_mode": "replay",
+   "live_calls": 5,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": true,
+    "answer_match": true,
+    "agent_error": null,
+    "gold": [
+     [
+      "web_search",
+      "1"
+     ]
+    ],
+    "agent": [
+     [
+      "web_search",
+      "1"
+     ]
+    ]
+   }
+  },
+  "model-not-found-failures": {
+   "run_id": "2fc7d6ab-a0ac-4bb9-ab4b-fab492b948d2",
+   "status": "completed",
+   "error": null,
+   "output": {
+    "data": {
+     "sql": "SELECT COUNT(*) AS cnt FROM runs WHERE status = 'failed' AND created_at < '2026-10-28' AND error ILIKE '%model does not exist%';",
+     "answer": "0",
+     "question": "How many failed runs created before October 28, 2026 failed because the requested model does not exist?",
+     "row_count": 1
+    },
+    "text": "The query shows that there are **0** runs that failed before October\u202f28\u202f2026 due to the error \u201cmodel does not exist\u201d.\n\n```json\n{\n  \"question\": \"How many failed runs created before October 28, 2026 failed because the requested model does not exist?\",\n  \"sql\": \"SELECT COUNT(*) AS cnt FROM runs WHERE status = 'failed' AND created_at < '2026-10-28' AND error ILIKE '%model does not exist%';\",\n  \"row_count\": 1,\n  \"answer\": \"0\"\n}\n```"
+   },
+   "duration_s": 4.33,
+   "first_step_s": 1.29,
+   "llm_calls": 4,
+   "tokens_in": 2067,
+   "tokens_out": 325,
+   "tokens": 2392,
+   "reasoning_tokens": 107,
+   "reserved_max_tokens": 16384,
+   "llm_s": 4.11,
+   "rate_limit_wait_s": 0.0,
+   "retries": 0,
+   "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+   ],
+   "tool_calls": [
+    {
+     "tool": "list_tables",
+     "args": {},
+     "error": null,
+     "output": "[\"agents\", \"alembic_version\", \"documents\", \"embeddings\", \"runs\", \"steps\", \"tool_calls\"]",
+     "truncated": false,
+     "ms": 33
+    },
+    {
+     "tool": "describe_table",
+     "args": {
+      "table_name": "runs"
+     },
+     "error": null,
+     "output": "[{\"column_name\": \"id\", \"data_type\": \"uuid\", \"is_nullable\": \"NO\"}, {\"column_name\": \"agent_id\", \"data_type\": \"uuid\", \"is_nullable\": \"YES\"}, {\"column_name\": \"status\", \"data_type\": \"character varying\", \"is_nullable\": \"NO\"}, {\"column_name\": \"input\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"output\", \"data_type\": \"jsonb\", \"is_nullable\": \"YES\"}, {\"column_name\": \"error\", \"data_type\": \"text\", \"is_nullable\": \"YES\"}, {\"column_name\": \"metadata\", \"data_type\": \"jsonb\", \"is_nullable\": \"NO\"}, {\"column_name\": \"started_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"finished_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}, {\"column_name\": \"created_at\", \"data_type\": \"timestamp with time zone\", \"is_nullable\": \"YES\"}]",
+     "truncated": false,
+     "ms": 31
+    },
+    {
+     "tool": "query_database",
+     "args": {
+      "sql": "SELECT COUNT(*) AS cnt FROM runs WHERE status = 'failed' AND created_at < '2026-10-28' AND error ILIKE '%model does not exist%';"
+     },
+     "error": null,
+     "output": "{\"rows\": [{\"cnt\": 0}], \"count\": 1, \"truncated\": false}",
+     "truncated": false,
+     "ms": 24
+    }
+   ],
+   "task": "model-not-found-failures",
+   "suite": "sql",
+   "model": "openai/gpt-oss-120b",
+   "agent": "sql-analyst",
+   "wall_s": 4.36,
+   "cache_mode": "replay",
+   "live_calls": 4,
+   "cache_hits": 0,
+   "score": {
+    "json_ok": true,
+    "sql_source": "json",
+    "exec_match": false,
+    "answer_match": false,
+    "agent_error": null,
+    "gold": [
+     [
+      "6"
+     ]
+    ],
+    "agent": [
+     [
+      "0"
+     ]
+    ]
+   }
+  }
+ }
+}

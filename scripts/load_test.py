@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import os
 import statistics
 import time
@@ -82,7 +83,7 @@ def pct(values: list[float], p: float) -> float:
     return ordered[min(len(ordered) - 1, int(round(p / 100 * (len(ordered) - 1))))]
 
 
-async def main(runs: int, concurrency: int, latency: float) -> None:
+async def main(runs: int, concurrency: int, latency: float, as_json: bool = False) -> None:
     stub = StubLLM(latency)
     nodes._get_llm = lambda model, tools: stub
 
@@ -143,6 +144,14 @@ async def main(runs: int, concurrency: int, latency: float) -> None:
 
     target = urlsplit(_DATABASE_URL)
     via = "PgBouncer" if target.port == 6432 else "Postgres (direct)"
+    if as_json:  # one line, for scripts/load_sweep.py
+        print(json.dumps({
+            "via": via, "runs": runs, "concurrency": concurrency, "completed": completed,
+            "structured": structured, "wall_s": round(wall, 3), "latencies": [round(x, 4) for x in latencies],
+            "peak_backends": peaks["total"], "peak_active": peaks["active"], "baseline": baseline["total"],
+            "errors": sorted(set(e[:160] for e in errors if e))[:3],
+        }))
+        return
     print(f"""
 Hive run-pipeline load test
   database path      : {via}  ({target.hostname}:{target.port})
@@ -162,5 +171,6 @@ if __name__ == "__main__":
     ap.add_argument("--runs", type=int, default=100)
     ap.add_argument("--concurrency", type=int, default=50)
     ap.add_argument("--llm-latency", type=float, default=0.4, help="seconds per stubbed model turn")
+    ap.add_argument("--json", action="store_true", help="print one JSON line instead of the report")
     a = ap.parse_args()
-    asyncio.run(main(a.runs, a.concurrency, a.llm_latency))
+    asyncio.run(main(a.runs, a.concurrency, a.llm_latency, a.json))

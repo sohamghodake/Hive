@@ -1,0 +1,153 @@
+{
+  "measured_at": "2026-10-28T11:03:45+00:00",
+  "stub_llm_latency_s": 0.4,
+  "rows": [
+    {
+      "path": "pgbouncer",
+      "workers": 1,
+      "concurrency": 10,
+      "runs": 50,
+      "completed": 50,
+      "runs_per_s": 6.7,
+      "p50_s": 1.24,
+      "p95_s": 2.32,
+      "peak_backends": 12,
+      "errors": []
+    },
+    {
+      "path": "pgbouncer",
+      "workers": 1,
+      "concurrency": 50,
+      "runs": 100,
+      "completed": 100,
+      "runs_per_s": 6.2,
+      "p50_s": 7.82,
+      "p95_s": 8.85,
+      "peak_backends": 22,
+      "errors": []
+    },
+    {
+      "path": "pgbouncer",
+      "workers": 1,
+      "concurrency": 100,
+      "runs": 200,
+      "completed": 200,
+      "runs_per_s": 10.5,
+      "p50_s": 8.93,
+      "p95_s": 12.47,
+      "peak_backends": 22,
+      "errors": []
+    },
+    {
+      "path": "pgbouncer",
+      "workers": 2,
+      "concurrency": 10,
+      "runs": 100,
+      "completed": 100,
+      "runs_per_s": 12.6,
+      "p50_s": 1.33,
+      "p95_s": 2.45,
+      "peak_backends": 23,
+      "errors": []
+    },
+    {
+      "path": "pgbouncer",
+      "workers": 2,
+      "concurrency": 50,
+      "runs": 200,
+      "completed": 200,
+      "runs_per_s": 18.1,
+      "p50_s": 5.5,
+      "p95_s": 6.63,
+      "peak_backends": 23,
+      "errors": []
+    },
+    {
+      "path": "pgbouncer",
+      "workers": 2,
+      "concurrency": 100,
+      "runs": 400,
+      "completed": 400,
+      "runs_per_s": 14.2,
+      "p50_s": 12.8,
+      "p95_s": 20.04,
+      "peak_backends": 28,
+      "errors": []
+    },
+    {
+      "path": "pgbouncer",
+      "workers": 4,
+      "concurrency": 10,
+      "runs": 200,
+      "completed": 200,
+      "runs_per_s": 22.8,
+      "p50_s": 1.32,
+      "p95_s": 2.94,
+      "peak_backends": 31,
+      "errors": []
+    },
+    {
+      "path": "pgbouncer",
+      "workers": 4,
+      "concurrency": 50,
+      "runs": 400,
+      "completed": 400,
+      "runs_per_s": 25.2,
+      "p50_s": 6.94,
+      "p95_s": 10.36,
+      "peak_backends": 30,
+      "errors": []
+    },
+    {
+      "path": "pgbouncer",
+      "workers": 4,
+      "concurrency": 100,
+      "runs": 800,
+      "completed": 800,
+      "runs_per_s": 24.7,
+      "p50_s": 14.12,
+      "p95_s": 24.56,
+      "peak_backends": 31,
+      "errors": []
+    },
+    {
+      "path": "direct",
+      "workers": 1,
+      "concurrency": 50,
+      "runs": 100,
+      "completed": 100,
+      "runs_per_s": 6.1,
+      "p50_s": 7.01,
+      "p95_s": 9.56,
+      "peak_backends": 57,
+      "errors": []
+    },
+    {
+      "path": "direct",
+      "workers": 2,
+      "concurrency": 50,
+      "runs": 200,
+      "completed": 200,
+      "runs_per_s": 9.8,
+      "p50_s": 9.25,
+      "p95_s": 12.23,
+      "peak_backends": 88,
+      "errors": []
+    },
+    {
+      "path": "direct",
+      "workers": 4,
+      "concurrency": 50,
+      "runs": 400,
+      "completed": 316,
+      "runs_per_s": 6.3,
+      "p50_s": 11.5,
+      "p95_s": 42.01,
+      "peak_backends": 99,
+      "errors": [
+        "(sqlalchemy.dialects.postgresql.asyncpg.Error) sorry, too many clients already\n(Background on this error at: https://sqlalche.me/e/21/dbapi)",
+        "QueuePool limit of size 10 overflow 20 reached, connection timed out, timeout 30.00 (Background on this error at: https://sqlalche.me/e/21/3o7r)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+diff --git a/app/cart.py b/app/cart.py
+new file mode 100644
+index 0000000..b81c3e2
+--- /dev/null
++++ b/app/cart.py
+@@ -0,0 +1,24 @@
++from dataclasses import dataclass
++
++
++@dataclass
++class LineItem:
++    sku: str
++    qty: int
++    unit_cents: int
++
++
++class Cart:
++    def __init__(self, owner: str, items: list = []):
++        self.owner = owner
++        self.items = items
++
++    def add(self, sku: str, qty: int, unit_cents: int) -> None:
++        if qty <= 0:
++            raise ValueError("qty must be positive")
++        self.items.append(LineItem(sku, qty, unit_cents))
++
++    def total_cents(self) -> int:
++        return sum(i.qty * i.unit_cents for i in self.items)
++
++    def is_empty(self) -> bool:
++        return not self.items

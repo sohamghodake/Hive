@@ -1,0 +1,793 @@
+{
+  "measured_at": "2026-10-28T10:42:41+00:00",
+  "corpus": {
+    "documents": 5,
+    "chars": 18666,
+    "questions": 40
+  },
+  "query_embed_ms": {
+    "p50": 9.7,
+    "p95": 14.2
+  },
+  "configs": [
+    {
+      "chunk_chars": 1000,
+      "overlap": 150,
+      "context": null,
+      "chunks": 27,
+      "evidence_split": 0,
+      "global": {
+        "hit@1": 0.425,
+        "hit@3": 0.725,
+        "hit@5": 0.925,
+        "mrr@10": 0.613,
+        "doc@1": 0.85
+      },
+      "scoped": {
+        "hit@1": 0.45,
+        "hit@3": 0.975,
+        "hit@5": 1.0,
+        "mrr@10": 0.693
+      },
+      "embed_chunks_per_s": 8.7,
+      "misses": [
+        {
+          "id": "acme-renewal-notice",
+          "rank": 6,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-provider-convenience",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-liability-cap",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#4: 'constitutes acceptance. Provider may suspend the Service without liability if any invoice '"
+        },
+        {
+          "id": "acme-ip-indemnity",
+          "rank": 4,
+          "top1": "brightline-services-agreement.md#4: \"party's patent, copyright or trade secret, and may at its option modify the deliverable so\""
+        },
+        {
+          "id": "acme-ml-training",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-dispute-forum",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-outage-credit",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-price-increase",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "brightline-cancel-notice",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#2: \"term. Notice of non-renewal must be sent by registered mail to Provider's registered offic\""
+        },
+        {
+          "id": "brightline-payment-due",
+          "rank": 5,
+          "top1": "acme-cloud-msa.md#3: 'Provider will delete Customer Data thirty (30) days after termination and has no obligatio'"
+        },
+        {
+          "id": "brightline-deliverable-ownership",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-share-confidential",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-confidentiality-duration",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#5: 'credit of five percent (5%) of the monthly fee, which must be requested within ten (10) da'"
+        },
+        {
+          "id": "brightline-insurance",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-courts",
+          "rank": 5,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "corvid-escalation",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#3: 'Provider will delete Customer Data thirty (30) days after termination and has no obligatio'"
+        },
+        {
+          "id": "corvid-derived-ownership",
+          "rank": 4,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-audit-notice",
+          "rank": null,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-lawful-collection",
+          "rank": 3,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-post-termination",
+          "rank": 8,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-refresh",
+          "rank": 3,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "handbook-core-hours",
+          "rank": 3,
+          "top1": "northgate-employee-handbook.md#0: '# Northgate Retail Employee Handbook (excerpt): Time Off, Remote Work and Expenses\\n## Paid'"
+        },
+        {
+          "id": "handbook-director-approval",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#4: 'constitutes acceptance. Provider may suspend the Service without liability if any invoice '"
+        }
+      ]
+    },
+    {
+      "chunk_chars": 500,
+      "overlap": 100,
+      "context": null,
+      "chunks": 61,
+      "evidence_split": 0,
+      "global": {
+        "hit@1": 0.45,
+        "hit@3": 0.85,
+        "hit@5": 0.95,
+        "mrr@10": 0.66,
+        "doc@1": 0.825
+      },
+      "scoped": {
+        "hit@1": 0.575,
+        "hit@3": 0.975,
+        "hit@5": 0.975,
+        "mrr@10": 0.762
+      },
+      "embed_chunks_per_s": 17.1,
+      "misses": [
+        {
+          "id": "acme-renewal-notice",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-provider-convenience",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-liability-cap",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#12: 'damages, subject to the same exceptions. This limitation applies equally to both parties. '"
+        },
+        {
+          "id": "acme-ml-training",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-dispute-forum",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-outage-credit",
+          "rank": 8,
+          "top1": "relay-api-guide.md#6: \"and deprecation notices are sent to the account's technical contact.\\n## Service Level Agre\""
+        },
+        {
+          "id": "brightline-renewal",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-payment-due",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#5: '(30) days after termination and has no obligation to provide an export.\\n## 4. Fees and Pay'"
+        },
+        {
+          "id": "brightline-deliverable-ownership",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-share-confidential",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-confidentiality-duration",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#9: 'must be requested within ten (10) days of the end of the affected month. ## 6. Confidentia'"
+        },
+        {
+          "id": "brightline-insurance",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-courts",
+          "rank": 3,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "corvid-initial-term",
+          "rank": 3,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-escalation",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#5: '(30) days after termination and has no obligation to provide an export.\\n## 4. Fees and Pay'"
+        },
+        {
+          "id": "corvid-derived-ownership",
+          "rank": 4,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-lawful-collection",
+          "rank": 2,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-post-termination",
+          "rank": 7,
+          "top1": "acme-cloud-msa.md#4: \"remains uncured sixty (60) days after Customer's detailed written notice describing the br\""
+        },
+        {
+          "id": "corvid-refresh",
+          "rank": 5,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "handbook-pto-accrual",
+          "rank": 2,
+          "top1": "northgate-employee-handbook.md#1: 'days should be submitted at least two weeks in advance through the HR portal.\\n## Sick Leav'"
+        },
+        {
+          "id": "handbook-director-approval",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#6: \"Travel expenses require Client's written pre-approval and are reimbursed at cost without m\""
+        },
+        {
+          "id": "relay-rate-limit",
+          "rank": 3,
+          "top1": "relay-api-guide.md#0: '# Relay Payments API: Developer Guide\\n## Authentication\\nEvery request must include an API '"
+        }
+      ]
+    },
+    {
+      "chunk_chars": 1500,
+      "overlap": 200,
+      "context": null,
+      "chunks": 18,
+      "evidence_split": 0,
+      "global": {
+        "hit@1": 0.525,
+        "hit@3": 0.775,
+        "hit@5": 0.9,
+        "mrr@10": 0.67,
+        "doc@1": 0.925
+      },
+      "scoped": {
+        "hit@1": 0.55,
+        "hit@3": 0.975,
+        "hit@5": 1.0,
+        "mrr@10": 0.748
+      },
+      "embed_chunks_per_s": 5.4,
+      "misses": [
+        {
+          "id": "acme-provider-convenience",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-liability-cap",
+          "rank": 3,
+          "top1": "brightline-services-agreement.md#3: '(12) months before the claim arose. Neither party is liable for indirect or consequential '"
+        },
+        {
+          "id": "acme-ip-indemnity",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#4: \"that the Service, when used as permitted, infringes a third party's intellectual property \""
+        },
+        {
+          "id": "acme-ml-training",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-dispute-forum",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-outage-credit",
+          "rank": 5,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-price-increase",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "brightline-payment-due",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#1: 'eighty (180) days before the end of the then-current term. Notice of non-renewal must be s'"
+        },
+        {
+          "id": "brightline-deliverable-ownership",
+          "rank": 3,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-share-confidential",
+          "rank": 9,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-confidentiality-duration",
+          "rank": 5,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-insurance",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-courts",
+          "rank": 4,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "corvid-escalation",
+          "rank": 8,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-derived-ownership",
+          "rank": 5,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-audit-notice",
+          "rank": null,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-lawful-collection",
+          "rank": 7,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-refresh",
+          "rank": 3,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "handbook-director-approval",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#1: 'On termination Client pays only for services performed through the termination date, and C'"
+        }
+      ]
+    },
+    {
+      "chunk_chars": 1000,
+      "overlap": 0,
+      "context": null,
+      "chunks": 24,
+      "evidence_split": 0,
+      "global": {
+        "hit@1": 0.475,
+        "hit@3": 0.875,
+        "hit@5": 0.95,
+        "mrr@10": 0.671,
+        "doc@1": 0.85
+      },
+      "scoped": {
+        "hit@1": 0.525,
+        "hit@3": 0.975,
+        "hit@5": 1.0,
+        "mrr@10": 0.744
+      },
+      "embed_chunks_per_s": 9.0,
+      "misses": [
+        {
+          "id": "acme-renewal-notice",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-provider-convenience",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-liability-cap",
+          "rank": 4,
+          "top1": "brightline-services-agreement.md#4: 'Consultant maintains commercial general liability insurance of at least $2,000,000 per occ'"
+        },
+        {
+          "id": "acme-ip-indemnity",
+          "rank": 3,
+          "top1": "brightline-services-agreement.md#3: '## 8. Indemnification\\nEach party will defend and indemnify the other against third-party c'"
+        },
+        {
+          "id": "acme-ml-training",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-dispute-forum",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-outage-credit",
+          "rank": 5,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-price-increase",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "brightline-payment-due",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#3: 'Customer shall pay all subscription fees annually in advance. Invoices are due net ten (10'"
+        },
+        {
+          "id": "brightline-deliverable-ownership",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-share-confidential",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#4: \"Each party will protect the other party's Confidential Information with at least the care \""
+        },
+        {
+          "id": "brightline-insurance",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "brightline-courts",
+          "rank": 7,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "corvid-escalation",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#3: 'Customer shall pay all subscription fees annually in advance. Invoices are due net ten (10'"
+        },
+        {
+          "id": "corvid-derived-ownership",
+          "rank": 3,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-audit-notice",
+          "rank": 2,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-lawful-collection",
+          "rank": 2,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-post-termination",
+          "rank": 6,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-refresh",
+          "rank": 3,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "handbook-core-hours",
+          "rank": 3,
+          "top1": "northgate-employee-handbook.md#0: '# Northgate Retail Employee Handbook (excerpt): Time Off, Remote Work and Expenses\\n## Paid'"
+        },
+        {
+          "id": "handbook-director-approval",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#1: \"Either party may terminate this Agreement or any SOW for convenience on thirty (30) days' \""
+        }
+      ]
+    },
+    {
+      "chunk_chars": 1000,
+      "overlap": 150,
+      "context": "filename",
+      "chunks": 27,
+      "evidence_split": 0,
+      "global": {
+        "hit@1": 0.7,
+        "hit@3": 0.95,
+        "hit@5": 0.975,
+        "mrr@10": 0.822,
+        "doc@1": 0.975
+      },
+      "scoped": {
+        "hit@1": 0.7,
+        "hit@3": 0.975,
+        "hit@5": 1.0,
+        "mrr@10": 0.83
+      },
+      "embed_chunks_per_s": 8.4,
+      "misses": [
+        {
+          "id": "acme-renewal-notice",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-liability-cap",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#4: 'constitutes acceptance. Provider may suspend the Service without liability if any invoice '"
+        },
+        {
+          "id": "acme-ip-indemnity",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#7: \"when used as permitted, infringes a third party's intellectual property rights. Provider h\""
+        },
+        {
+          "id": "acme-outage-credit",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#3: 'Provider will delete Customer Data thirty (30) days after termination and has no obligatio'"
+        },
+        {
+          "id": "brightline-payment-due",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#2: \"in an SOW are fixed for the term of this Agreement. Travel expenses require Client's writt\""
+        },
+        {
+          "id": "brightline-courts",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "corvid-derived-ownership",
+          "rank": 2,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-audit-notice",
+          "rank": 9,
+          "top1": "corvid-data-license.md#1: 'month periods unless either party gives written notice of non-renewal at least sixty (60) '"
+        },
+        {
+          "id": "corvid-refresh",
+          "rank": 2,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "handbook-core-hours",
+          "rank": 3,
+          "top1": "northgate-employee-handbook.md#0: '# Northgate Retail Employee Handbook (excerpt): Time Off, Remote Work and Expenses\\n## Paid'"
+        },
+        {
+          "id": "handbook-director-approval",
+          "rank": 4,
+          "top1": "acme-cloud-msa.md#4: 'constitutes acceptance. Provider may suspend the Service without liability if any invoice '"
+        },
+        {
+          "id": "handbook-premium-economy",
+          "rank": 2,
+          "top1": "northgate-employee-handbook.md#3: \"may be booked in premium economy. All travel must be booked through the company's travel p\""
+        }
+      ]
+    },
+    {
+      "chunk_chars": 1000,
+      "overlap": 150,
+      "context": "title",
+      "chunks": 27,
+      "evidence_split": 0,
+      "global": {
+        "hit@1": 0.7,
+        "hit@3": 0.975,
+        "hit@5": 0.975,
+        "mrr@10": 0.828,
+        "doc@1": 1.0
+      },
+      "scoped": {
+        "hit@1": 0.7,
+        "hit@3": 0.975,
+        "hit@5": 1.0,
+        "mrr@10": 0.83
+      },
+      "embed_chunks_per_s": 8.5,
+      "misses": [
+        {
+          "id": "acme-renewal-notice",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#0: '# Acme Cloud Master Subscription Agreement\\nThis Master Subscription Agreement (\"Agreement\"'"
+        },
+        {
+          "id": "acme-liability-cap",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#4: 'constitutes acceptance. Provider may suspend the Service without liability if any invoice '"
+        },
+        {
+          "id": "acme-ip-indemnity",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#7: \"when used as permitted, infringes a third party's intellectual property rights. Provider h\""
+        },
+        {
+          "id": "brightline-courts",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "corvid-derived-ownership",
+          "rank": 2,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-audit-notice",
+          "rank": 10,
+          "top1": "corvid-data-license.md#1: 'month periods unless either party gives written notice of non-renewal at least sixty (60) '"
+        },
+        {
+          "id": "corvid-lawful-collection",
+          "rank": 2,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-post-termination",
+          "rank": 2,
+          "top1": "corvid-data-license.md#2: 'Late payments bear interest at the statutory rate under the Late Payment of Commercial Deb'"
+        },
+        {
+          "id": "corvid-refresh",
+          "rank": 3,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "handbook-core-hours",
+          "rank": 3,
+          "top1": "northgate-employee-handbook.md#2: 'country for more than fourteen (14) days in a year requires prior approval from HR and Leg'"
+        },
+        {
+          "id": "handbook-director-approval",
+          "rank": 2,
+          "top1": "northgate-employee-handbook.md#2: 'country for more than fourteen (14) days in a year requires prior approval from HR and Leg'"
+        },
+        {
+          "id": "handbook-premium-economy",
+          "rank": 2,
+          "top1": "northgate-employee-handbook.md#3: \"may be booked in premium economy. All travel must be booked through the company's travel p\""
+        }
+      ]
+    },
+    {
+      "chunk_chars": 1000,
+      "overlap": 150,
+      "context": "title+heading",
+      "chunks": 27,
+      "evidence_split": 0,
+      "global": {
+        "hit@1": 0.7,
+        "hit@3": 0.975,
+        "hit@5": 0.975,
+        "mrr@10": 0.821,
+        "doc@1": 0.975
+      },
+      "scoped": {
+        "hit@1": 0.725,
+        "hit@3": 0.975,
+        "hit@5": 1.0,
+        "mrr@10": 0.838
+      },
+      "embed_chunks_per_s": 8.1,
+      "misses": [
+        {
+          "id": "acme-renewal-notice",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#2: \"term. Notice of non-renewal must be sent by registered mail to Provider's registered offic\""
+        },
+        {
+          "id": "acme-liability-cap",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#4: 'constitutes acceptance. Provider may suspend the Service without liability if any invoice '"
+        },
+        {
+          "id": "acme-ip-indemnity",
+          "rank": 2,
+          "top1": "acme-cloud-msa.md#7: \"when used as permitted, infringes a third party's intellectual property rights. Provider h\""
+        },
+        {
+          "id": "acme-outage-credit",
+          "rank": 3,
+          "top1": "acme-cloud-msa.md#3: 'Provider will delete Customer Data thirty (30) days after termination and has no obligatio'"
+        },
+        {
+          "id": "brightline-payment-due",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#2: \"in an SOW are fixed for the term of this Agreement. Travel expenses require Client's writt\""
+        },
+        {
+          "id": "brightline-courts",
+          "rank": 2,
+          "top1": "brightline-services-agreement.md#0: '# Brightline Professional Services Agreement\\nThis Professional Services Agreement (\"Agreem'"
+        },
+        {
+          "id": "corvid-escalation",
+          "rank": 2,
+          "top1": "northgate-employee-handbook.md#3: \"may be booked in premium economy. All travel must be booked through the company's travel p\""
+        },
+        {
+          "id": "corvid-derived-ownership",
+          "rank": 2,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "corvid-audit-notice",
+          "rank": null,
+          "top1": "corvid-data-license.md#1: 'month periods unless either party gives written notice of non-renewal at least sixty (60) '"
+        },
+        {
+          "id": "corvid-refresh",
+          "rank": 3,
+          "top1": "corvid-data-license.md#0: '# Corvid Analytics Data License Agreement\\nThis Data License Agreement (\"Agreement\") is bet'"
+        },
+        {
+          "id": "handbook-core-hours",
+          "rank": 3,
+          "top1": "northgate-employee-handbook.md#2: 'country for more than fourteen (14) days in a year requires prior approval from HR and Leg'"
+        },
+        {
+          "id": "handbook-premium-economy",
+          "rank": 2,
+          "top1": "northgate-employee-handbook.md#3: \"may be booked in premium economy. All travel must be booked through the company's travel p\""
+        }
+      ]
+    }
+  ],
+  "pgvector_hnsw": {
+    "global": {
+      "hit@1": 0.425,
+      "hit@3": 0.725,
+      "hit@5": 0.925,
+      "mrr@10": 0.613
+    },
+    "ann_vs_exact_overlap@5": 1.0,
+    "sql_ms": {
+      "p50": 0.44,
+      "p95": 0.81
+    }
+  }
+}

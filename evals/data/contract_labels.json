@@ -1,0 +1,83 @@
+{
+  "_risky": "a clause labelled medium or high should be flagged medium or high; one labelled low should not be flagged high",
+  "eval-acme-cloud-msa.md": {
+    "source": "acme-cloud-msa.md",
+    "overall": [
+      "high"
+    ],
+    "clauses": {
+      "term_renewal": "high",
+      "termination": "high",
+      "liability": "high",
+      "indemnification": "high",
+      "payment": "high",
+      "confidentiality": "low",
+      "ip": "high",
+      "governing_law": "high"
+    },
+    "evidence": {
+      "term_renewal": "renew automatically for successive thirty-six (36) month",
+      "termination": "for convenience upon fifteen (15) days",
+      "liability": "shall not exceed the fees paid by Customer in the one (1) month",
+      "indemnification": "Customer shall defend, indemnify and hold harmless Provider",
+      "payment": "Invoices are due net ten (10) days",
+      "confidentiality": "protect the other party's Confidential Information",
+      "ip": "perpetual, irrevocable, worldwide, royalty-free license",
+      "governing_law": "governed by the laws of the Cayman Islands"
+    }
+  },
+  "eval-brightline-services-agreement.md": {
+    "source": "brightline-services-agreement.md",
+    "overall": [
+      "low",
+      "medium"
+    ],
+    "clauses": {
+      "term_renewal": "low",
+      "termination": "low",
+      "liability": "low",
+      "indemnification": "low",
+      "payment": "low",
+      "confidentiality": "medium",
+      "ip": "low",
+      "governing_law": "low"
+    },
+    "evidence": {
+      "term_renewal": "It does not renew automatically",
+      "termination": "for convenience on thirty (30) days' written notice",
+      "liability": "limited to the fees paid or payable under this Agreement",
+      "indemnification": "Each party will defend and indemnify the other",
+      "payment": "within forty-five (45) days of receiving a correct invoice",
+      "confidentiality": "share Client's Confidential Information with its affiliates",
+      "ip": "Client owns all deliverables and work product",
+      "governing_law": "governed by the laws of the State of New York"
+    }
+  },
+  "eval-corvid-data-license.md": {
+    "source": "corvid-data-license.md",
+    "overall": [
+      "medium",
+      "high"
+    ],
+    "clauses": {
+      "term_renewal": "low",
+      "termination": "medium",
+      "liability": "low",
+      "indemnification": "low",
+      "payment": "medium",
+      "confidentiality": "low",
+      "ip": "high",
+      "governing_law": "low"
+    },
+    "evidence": {
+      "term_renewal": "The initial term is twenty-four (24) months",
+      "termination": "immediately, without any cure period",
+      "liability": "capped at the fees paid by Licensee in the twelve (12) months",
+      "indemnification": "Licensor will defend and indemnify Licensee",
+      "payment": "increase automatically by seven percent (7%)",
+      "confidentiality": "keep the other's confidential information confidential",
+      "ip": "derivative works that Licensee creates using the Data",
+      "governing_law": "governed by the laws of England and Wales"
+    }
+  }
+}

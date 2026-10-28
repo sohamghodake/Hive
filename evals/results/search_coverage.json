@@ -1,0 +1,390 @@
+{
+  "measured_at": "2026-10-28T11:16:19+00:00",
+  "queries": [
+    "term and renewal",
+    "termination",
+    "limitation of liability",
+    "indemnification",
+    "payment terms",
+    "confidentiality",
+    "intellectual property",
+    "governing law"
+  ],
+  "char_budget": 5000,
+  "strategies": {
+    "production (score order, 700-char passages)": {
+      "eval-acme-cloud-msa.md": {
+        "passages": 6,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "payment",
+          "confidentiality"
+        ],
+        "missing": [
+          "indemnification",
+          "ip",
+          "governing_law"
+        ]
+      },
+      "eval-brightline-services-agreement.md": {
+        "passages": 5,
+        "covered": [
+          "termination",
+          "liability",
+          "indemnification",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": [
+          "term_renewal",
+          "payment"
+        ]
+      },
+      "eval-corvid-data-license.md": {
+        "passages": 5,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip"
+        ],
+        "missing": [
+          "governing_law"
+        ]
+      }
+    },
+    "per-query first, 700-char passages": {
+      "eval-acme-cloud-msa.md": {
+        "passages": 6,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "payment",
+          "confidentiality"
+        ],
+        "missing": [
+          "indemnification",
+          "ip",
+          "governing_law"
+        ]
+      },
+      "eval-brightline-services-agreement.md": {
+        "passages": 5,
+        "covered": [
+          "termination",
+          "liability",
+          "indemnification",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": [
+          "term_renewal",
+          "payment"
+        ]
+      },
+      "eval-corvid-data-license.md": {
+        "passages": 5,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip"
+        ],
+        "missing": [
+          "governing_law"
+        ]
+      }
+    },
+    "per-query first, 500-char passages": {
+      "eval-acme-cloud-msa.md": {
+        "passages": 7,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "payment",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": [
+          "indemnification"
+        ]
+      },
+      "eval-brightline-services-agreement.md": {
+        "passages": 6,
+        "covered": [
+          "termination",
+          "liability",
+          "ip",
+          "governing_law"
+        ],
+        "missing": [
+          "term_renewal",
+          "indemnification",
+          "payment",
+          "confidentiality"
+        ]
+      },
+      "eval-corvid-data-license.md": {
+        "passages": 5,
+        "covered": [
+          "termination",
+          "indemnification",
+          "confidentiality",
+          "ip"
+        ],
+        "missing": [
+          "term_renewal",
+          "liability",
+          "payment",
+          "governing_law"
+        ]
+      }
+    }
+  },
+  "simulated_chunking": {
+    "1000/150 chunks, 700-char passages": {
+      "eval-acme-cloud-msa.md": {
+        "passages": 6,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "payment",
+          "confidentiality"
+        ],
+        "missing": [
+          "indemnification",
+          "ip",
+          "governing_law"
+        ]
+      },
+      "eval-brightline-services-agreement.md": {
+        "passages": 5,
+        "covered": [
+          "termination",
+          "liability",
+          "indemnification",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": [
+          "term_renewal",
+          "payment"
+        ]
+      },
+      "eval-corvid-data-license.md": {
+        "passages": 5,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip"
+        ],
+        "missing": [
+          "governing_law"
+        ]
+      }
+    },
+    "1000/150 chunks, 1000-char passages": {
+      "eval-acme-cloud-msa.md": {
+        "passages": 5,
+        "covered": [
+          "term_renewal",
+          "liability",
+          "payment",
+          "confidentiality"
+        ],
+        "missing": [
+          "termination",
+          "indemnification",
+          "ip",
+          "governing_law"
+        ]
+      },
+      "eval-brightline-services-agreement.md": {
+        "passages": 5,
+        "covered": [
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": [
+          "term_renewal"
+        ]
+      },
+      "eval-corvid-data-license.md": {
+        "passages": 5,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": []
+      }
+    },
+    "750/100 chunks, 750-char passages": {
+      "eval-acme-cloud-msa.md": {
+        "passages": 7,
+        "covered": [
+          "term_renewal",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "governing_law"
+        ],
+        "missing": [
+          "termination",
+          "ip"
+        ]
+      },
+      "eval-brightline-services-agreement.md": {
+        "passages": 7,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip"
+        ],
+        "missing": [
+          "governing_law"
+        ]
+      },
+      "eval-corvid-data-license.md": {
+        "passages": 5,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": []
+      }
+    },
+    "600/100 chunks, 600-char passages": {
+      "eval-acme-cloud-msa.md": {
+        "passages": 7,
+        "covered": [
+          "term_renewal",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "governing_law"
+        ],
+        "missing": [
+          "termination",
+          "ip"
+        ]
+      },
+      "eval-brightline-services-agreement.md": {
+        "passages": 8,
+        "covered": [
+          "term_renewal",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "governing_law"
+        ],
+        "missing": [
+          "termination",
+          "ip"
+        ]
+      },
+      "eval-corvid-data-license.md": {
+        "passages": 8,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": []
+      }
+    },
+    "500/100 chunks, 500-char passages": {
+      "eval-acme-cloud-msa.md": {
+        "passages": 9,
+        "covered": [
+          "term_renewal",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "governing_law"
+        ],
+        "missing": [
+          "termination",
+          "ip"
+        ]
+      },
+      "eval-brightline-services-agreement.md": {
+        "passages": 9,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "confidentiality",
+          "governing_law"
+        ],
+        "missing": [
+          "payment",
+          "ip"
+        ]
+      },
+      "eval-corvid-data-license.md": {
+        "passages": 8,
+        "covered": [
+          "term_renewal",
+          "termination",
+          "liability",
+          "indemnification",
+          "payment",
+          "confidentiality",
+          "ip",
+          "governing_law"
+        ],
+        "missing": []
+      }
+    }
+  }
+}

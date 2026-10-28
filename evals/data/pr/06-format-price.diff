@@ -1,0 +1,28 @@
+diff --git a/app/formatting.py b/app/formatting.py
+index 5a8e2f1..d14b9c7 100644
+--- a/app/formatting.py
++++ b/app/formatting.py
+@@ -1,2 +1,8 @@
+-def fmt_price(cents):
+-    return "$%.2f" % (cents / 100)
++def format_price(cents: int) -> str:
++    """Format an amount in cents as dollars, e.g. 1999 -> "$19.99"."""
++    return f"${cents / 100:.2f}"
++
++
++# Kept so existing callers keep working; remove once they have migrated.
++fmt_price = format_price
+diff --git a/tests/test_formatting.py b/tests/test_formatting.py
+new file mode 100644
+index 0000000..3f6a0c2
+--- /dev/null
++++ b/tests/test_formatting.py
+@@ -0,0 +1,8 @@
++from app.formatting import fmt_price, format_price
++
++
++def test_format_price():
++    assert format_price(1999) == "$19.99"
++    assert format_price(5) == "$0.05"
++    assert format_price(0) == "$0.00"
++    assert fmt_price(100) == "$1.00"

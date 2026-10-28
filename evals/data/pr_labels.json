@@ -1,0 +1,18 @@
+[
+  {"id": "01-pagination", "title": "Paginate order exports with iter_pages",
+   "bug": {"file": "pagination.py", "what": "floor division drops the last partial page",
+           "patterns": ["floor|//|integer division|partial|last page|remainder|ceil|rounds? down|drop|miss|lost|lose|off.by.one|fewer pages|truncat"]}},
+  {"id": "02-order-search", "title": "Add order search to the support page",
+   "bug": {"file": "orders.py", "what": "SQL injection via f-string query built from request input",
+           "patterns": ["inject|parameteri|placeholder|f-string|interpolat|concatenat|unsanitized|unescaped|escap"]}},
+  {"id": "03-notify", "title": "Send shipping notifications in parallel",
+   "bug": {"file": "notify.js", "what": "async forEach is not awaited: markNotified runs before emails send and send errors escape the try",
+           "patterns": ["forEach|await|promise|unhandled|race|before .*(sent|complete|finish)|fire.and.forget"]}},
+  {"id": "04-cart", "title": "Add a Cart model",
+   "bug": {"file": "cart.py", "what": "mutable default argument shares one list between carts",
+           "patterns": ["mutable|default (argument|value|list|parameter)|shared (list|between|across)|same list|= \\[\\]"]}},
+  {"id": "05-dashboard-cache", "title": "Cache dashboard data for 60 seconds",
+   "bug": {"file": "dashboard.py", "what": "cache key ignores the user, so one user's balance and orders are served to others",
+           "patterns": ["cache|key", "user|leak|another|other|shared|privacy|session|personal|cross"]}},
+  {"id": "06-format-price", "title": "Rename fmt_price to format_price", "bug": null}
+]

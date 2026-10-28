@@ -1,0 +1,32 @@
+diff --git a/src/notify.js b/src/notify.js
+index 4e2a9b1..c7d03f8 100644
+--- a/src/notify.js
++++ b/src/notify.js
+@@ -1,14 +1,20 @@
+ const { sendEmail } = require("./mailer");
+ const { markNotified } = require("./store");
+ const logger = require("./logger");
+ 
+-async function notifyAll(users) {
+-  for (const user of users) {
+-    await sendEmail(user.email, template(user));
+-  }
+-  await markNotified(users.map((u) => u.id));
+-}
++// Send in parallel instead of one at a time; the sequential loop took minutes
++// for large mailing lists.
++async function notifyAll(users) {
++  try {
++    users.forEach(async (user) => {
++      await sendEmail(user.email, template(user));
++    });
++    await markNotified(users.map((u) => u.id));
++  } catch (err) {
++    logger.error("notification batch failed", err);
++    throw err;
++  }
++}
+ 
+ function template(user) {
+   return `Hi ${user.firstName}, your order has shipped.`;
+ }
