@@ -13,7 +13,7 @@ async def _file_tool(tool: str, args: dict):
         return await call_tool("mcp-file", tool, args)
     except ToolError as exc:
         msg = str(exc)
-        raise HTTPException(404 if "not found" in msg.lower() else 400, msg)
+        raise HTTPException(404 if "not found" in msg.lower() else 400, msg) from exc
 
 
 class FileEntry(BaseModel):

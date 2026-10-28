@@ -93,29 +93,28 @@ def _jsonable(value):
 
 async def _fetch(sql: str, *args, limit: int | None = None) -> list[dict]:
     pool = await _get_pool()
-    async with pool.acquire() as conn:
-        # Postgres rejects any write inside a READ ONLY transaction, including
-        # writes hidden in functions the keyword filter cannot see.
-        async with conn.transaction(readonly=True):
-            # Set per transaction, not per connection: behind PgBouncer in
-            # transaction mode a session-level setting would leak to whichever
-            # client gets this server connection next. Without it, pg_sleep()
-            # or an accidental cross join holds a backend indefinitely.
-            await conn.execute(f"SET LOCAL statement_timeout = {STATEMENT_TIMEOUT_MS}")
-            if limit is None:
-                rows = await conn.fetch(sql, *args)
-            else:
-                # A cursor stops the server after `limit` rows; fetch() would
-                # materialise the whole result in this process before slicing.
-                rows = await (await conn.cursor(sql, *args)).fetch(limit)
+    # Postgres rejects any write inside a READ ONLY transaction, including
+    # writes hidden in functions the keyword filter cannot see.
+    async with pool.acquire() as conn, conn.transaction(readonly=True):
+        # Set per transaction, not per connection: behind PgBouncer in
+        # transaction mode a session-level setting would leak to whichever
+        # client gets this server connection next. Without it, pg_sleep()
+        # or an accidental cross join holds a backend indefinitely.
+        await conn.execute(f"SET LOCAL statement_timeout = {STATEMENT_TIMEOUT_MS}")
+        if limit is None:
+            rows = await conn.fetch(sql, *args)
+        else:
+            # A cursor stops the server after `limit` rows; fetch() would
+            # materialise the whole result in this process before slicing.
+            rows = await (await conn.cursor(sql, *args)).fetch(limit)
     return [{k: _jsonable(v) for k, v in r.items()} for r in rows]
 
 
 def _as_uuid(value: str) -> uuid.UUID:
     try:
         return uuid.UUID(value)
-    except ValueError:
-        raise ToolError(f"Not a valid document id: {value!r}. Call list_documents first.")
+    except ValueError as exc:
+        raise ToolError(f"Not a valid document id: {value!r}. Call list_documents first.") from exc
 
 
 @mcp.tool

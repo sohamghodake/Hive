@@ -1,6 +1,5 @@
-import uuid
-
 import asyncio
+import uuid
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile
 from sqlalchemy import select
@@ -30,7 +29,7 @@ async def upload_document(file: UploadFile, background: BackgroundTasks, db=DBSe
     try:
         content = await asyncio.to_thread(extract_text, raw, name, file.content_type)
     except Exception as exc:
-        raise HTTPException(422, f"Could not extract text from {name}: {exc}")
+        raise HTTPException(422, f"Could not extract text from {name}: {exc}") from exc
     if not content.strip():
         raise HTTPException(422, f"No extractable text in {name} (scanned PDFs need OCR)")
 

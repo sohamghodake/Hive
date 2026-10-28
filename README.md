@@ -1,5 +1,7 @@
 # Hive
 
+[![CI](https://github.com/sohamghodake/Hive/actions/workflows/ci.yml/badge.svg)](https://github.com/sohamghodake/Hive/actions/workflows/ci.yml)
+
 A self-hosted multi-agent platform. Define agents as a system prompt plus a scoped
 set of tools, give them a task — review this contract, review this pull request,
 answer this question from the database — and watch each run execute step by step.
@@ -281,20 +283,28 @@ and commit the regenerated files with it.
 
 ### Tests
 
-57 tests: tool scoping, step budgets, the SQL/file/SSRF guards, all four MCP servers
-over the real protocol (fastmcp's in-memory client), chunking, batched search,
-structured-output parsing, and the API. The suite needs a `hive_test` database and
-runs against the API image, which does not ship the tests:
+The suite covers tool scoping, step budgets, the SQL/file/SSRF guards, all four MCP
+servers over the real protocol (fastmcp's in-memory client), the read-only database
+role, chunking, batched search, structured-output parsing, and the API. CI
+([`ci.yml`](.github/workflows/ci.yml)) runs it on every push and pull request against a
+pgvector service container, along with ruff and a check that the lock files are current.
+
+Locally it needs [uv](https://docs.astral.sh/uv/) and a `hive_test` database:
 
 ```bash
-docker compose exec postgres psql -U hive -d postgres -c "CREATE DATABASE hive_test;"
-
-docker run --rm --network hive_default \
-  -e TEST_DATABASE_URL=postgresql+asyncpg://hive:hivepass@postgres:5432/hive_test \
-  -e PYTHONPATH=/app \
-  -v "$PWD/tests:/app/tests:ro" -v "$PWD/mcp_servers:/app/mcp_servers:ro" \
-  hive-api sh -c 'pip install -q pytest pytest-asyncio pytest-cov && python -m pytest tests -q'
+docker compose up -d postgres
+docker compose exec postgres createdb -U hive hive_test
+make install    # the locked environment, plus pytest and ruff
+make test
+make lint
 ```
+
+The `hive_reader` privilege test is skipped unless `TEST_READER_DATABASE_URL` points at
+a database migrated to head. CI sets it. Against the compose stack, run
+`TEST_READER_DATABASE_URL=postgresql://hive_reader:hivereader@localhost:5432/hive make test`.
+
+To run the same checks before every commit and push, install the git hooks once with
+`lefthook install` (see `lefthook.yml`).
 
 ---
 

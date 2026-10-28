@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint and lock
+    runs-on: ubuntu-24.04
+    env:
+      RUFF_OUTPUT_FORMAT: github
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.13.6"
+          enable-cache: true
+      # Fails if pyproject.toml changed without `make lock`, or if an MCP
+      # image's requirements.txt no longer matches uv.lock.
+      - name: Lock files are current
+        run: make lock && git diff --exit-code
+      - name: Ruff
+        run: make lint
+
+  test:
+    name: Tests
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: hive
+          POSTGRES_PASSWORD: hivepass
+          POSTGRES_DB: hive_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hive -d hive_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://hive:hivepass@localhost:5432/hive_test
+      # A second database, migrated to head so the hive_reader role exists;
+      # without it the role's privilege test is skipped.
+      TEST_READER_DATABASE_URL: postgresql://hive_reader:hivereader@localhost:5432/hive_migrated
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.cache/fastembed
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.13.6"
+          enable-cache: true
+      - name: Install from uv.lock
+        run: uv sync --locked
+
+      - name: Migrate a separate database to head
+        env:
+          MIGRATION_DATABASE_URL: postgresql+asyncpg://hive:hivepass@localhost:5432/hive_migrated
+          MCP_DB_PASSWORD: hivereader
+        run: |
+          docker exec ${{ job.services.postgres.id }} createdb -U hive hive_migrated
+          uv run alembic upgrade head
+
+      # The ingestion and retrieval tests embed with the real model (~130 MB).
+      - name: Cache the embedding model
+        id: fastembed
+        uses: actions/cache@v6
+        with:
+          path: .cache/fastembed
+          key: fastembed-0.8.1-BAAI-bge-small-en-v1.5
+      - name: Download the embedding model
+        if: steps.fastembed.outputs.cache-hit != 'true'
+        run: uv run python -c "from rag.embeddings import embed_passages; embed_passages(['warmup'])"
+
+      - name: Pytest
+        run: make test

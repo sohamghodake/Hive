@@ -10,7 +10,8 @@ import sys
 from sqlalchemy import select
 
 from api.models.agent import Agent
-from db.session import _session_factory as factory, engine
+from db.session import _session_factory as factory
+from db.session import engine
 
 # Only models with tool-calling support belong here; see README "Choosing a model".
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")

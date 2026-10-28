@@ -1,12 +1,12 @@
 import os
 
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from api.main import app
 from api.dependencies import get_db
+from api.main import app
 from db.base import Base
 
 # Overridable so the suite can run either on the host or inside the api container,

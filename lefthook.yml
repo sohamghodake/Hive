@@ -1,14 +1,13 @@
+# The same checks as CI (.github/workflows/ci.yml), with the same locked tool
+# versions. Enable once per clone with `lefthook install`.
 pre-commit:
-  parallel: true
   commands:
     lint:
       glob: "*.py"
-      run: ruff check {staged_files}
-    format:
-      glob: "*.py"
-      run: ruff format --check {staged_files}
+      run: uv run --only-dev ruff check {staged_files}
 
 pre-push:
   commands:
+    # Needs the hive_test database; see README "Tests".
     tests:
-      run: pytest -x -q
+      run: uv run pytest -x -q

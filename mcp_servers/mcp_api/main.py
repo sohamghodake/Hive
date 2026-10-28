@@ -37,8 +37,8 @@ async def _assert_public(url: str) -> None:
             parts.hostname, parts.port or (443 if parts.scheme == "https" else 80),
             type=socket.SOCK_STREAM,
         )
-    except socket.gaierror:
-        raise ToolError(f"Cannot resolve host: {parts.hostname}")
+    except socket.gaierror as exc:
+        raise ToolError(f"Cannot resolve host: {parts.hostname}") from exc
 
     for info in infos:
         ip = ipaddress.ip_address(info[4][0])

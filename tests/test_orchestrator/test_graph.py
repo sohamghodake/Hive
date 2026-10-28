@@ -1,8 +1,8 @@
 import pytest
 from langchain_core.messages import AIMessage
 
-from orchestrator.state import AgentState
 from orchestrator.nodes import act, should_continue
+from orchestrator.state import AgentState
 
 
 def _state(**over) -> AgentState:

@@ -1,11 +1,11 @@
-.PHONY: dev test build lint fmt migrate seed install lock
+.PHONY: dev test build lint fmt typecheck migrate seed install lock
 
 # ── Local dev ──────────────────────────────────────────────────────────────────
 dev:
 	docker compose up --build
 
 dev-api:
-	uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+	uv run uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
 dev-frontend:
 	cd frontend && npm run dev
@@ -28,33 +28,32 @@ install-frontend:
 
 # ── Database ───────────────────────────────────────────────────────────────────
 migrate:
-	alembic upgrade head
+	uv run alembic upgrade head
 
 migrate-down:
-	alembic downgrade -1
+	uv run alembic downgrade -1
 
 migration:
-	alembic revision --autogenerate -m "$(name)"
+	uv run alembic revision --autogenerate -m "$(name)"
 
 seed:
-	python scripts/seed.py
+	uv run python scripts/seed.py
 
 # ── Quality ────────────────────────────────────────────────────────────────────
+# CI runs `make lint` and `make test`; lefthook runs the same checks (lefthook.yml).
 lint:
-	ruff check .
+	uv run --only-dev ruff check .
 
 fmt:
-	ruff format .
+	uv run --only-dev ruff format .
 
 typecheck:
-	mypy api orchestrator db
+	uv run mypy api orchestrator db rag
 
 # ── Tests ──────────────────────────────────────────────────────────────────────
+# Needs a hive_test database (see README "Tests"). -rs prints why anything skipped.
 test:
-	pytest -v --cov=api --cov=orchestrator --cov=db --cov-report=term-missing
-
-test-watch:
-	pytest -v -f
+	uv run pytest -v -rs --cov=api --cov=orchestrator --cov=db --cov=rag --cov-report=term-missing
 
 # ── Build ──────────────────────────────────────────────────────────────────────
 build:
@@ -71,7 +70,7 @@ psql:
 	docker compose exec postgres psql -U hive -d hive
 
 example:
-	python scripts/example_run.py
+	uv run python scripts/example_run.py
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

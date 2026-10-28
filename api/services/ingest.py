@@ -39,26 +39,25 @@ def extract_text(raw: bytes, filename: str, content_type: str | None) -> str:
 
 async def index_document(document_id: uuid.UUID) -> int:
     """(Re)build a document's embeddings. Returns the number of chunks stored."""
-    async with _ingest_lock:
-        async with _session_factory() as db:
-            doc = await db.get(Document, document_id)
-            if doc is None:
-                return 0
-            chunks = chunk_text(doc.content)
-            await db.execute(delete(Embedding).where(Embedding.document_id == document_id))
+    async with _ingest_lock, _session_factory() as db:
+        doc = await db.get(Document, document_id)
+        if doc is None:
+            return 0
+        chunks = chunk_text(doc.content)
+        await db.execute(delete(Embedding).where(Embedding.document_id == document_id))
 
-            # Embed in slices so peak memory is bounded by the slice, not the
-            # document, and the event loop gets control back between slices.
-            for start in range(0, len(chunks), INGEST_SLICE):
-                part = chunks[start:start + INGEST_SLICE]
-                vectors = await asyncio.to_thread(embed_passages, part)
-                db.add_all(
-                    Embedding(document_id=document_id, chunk_index=start + i, chunk_text=text, embedding=vec)
-                    for i, (text, vec) in enumerate(zip(part, vectors))
-                )
-                await db.flush()
-            doc.embedded = bool(chunks)
-            await db.commit()
+        # Embed in slices so peak memory is bounded by the slice, not the
+        # document, and the event loop gets control back between slices.
+        for start in range(0, len(chunks), INGEST_SLICE):
+            part = chunks[start:start + INGEST_SLICE]
+            vectors = await asyncio.to_thread(embed_passages, part)
+            db.add_all(
+                Embedding(document_id=document_id, chunk_index=start + i, chunk_text=text, embedding=vec)
+                for i, (text, vec) in enumerate(zip(part, vectors, strict=True))
+            )
+            await db.flush()
+        doc.embedded = bool(chunks)
+        await db.commit()
 
     logger.info("indexed document %s: %d chunks", document_id, len(chunks))
     return len(chunks)

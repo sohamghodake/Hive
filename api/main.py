@@ -1,11 +1,11 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import FastAPI
-from sqlalchemy import update
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import update
 
 from api.config import settings
 from api.models.run import Run
@@ -31,7 +31,7 @@ async def _fail_orphaned_runs() -> None:
             .values(
                 status="failed",
                 error="Interrupted: the API restarted while this run was in progress.",
-                finished_at=datetime.now(timezone.utc),
+                finished_at=datetime.now(UTC),
             )
         )
         await db.commit()
