@@ -1,5 +1,6 @@
 from unittest.mock import AsyncMock, patch
 
+import pytest
 from langchain_core.messages import AIMessage
 
 from orchestrator import nodes, tools
@@ -63,7 +64,42 @@ async def test_finalize_flags_runs_cut_off_by_step_budget():
 def test_parses_groq_retry_after():
     assert nodes._suggested_wait(Exception("Please try again in 7.52s.")) == 7.52
     assert nodes._suggested_wait(Exception("try again in 1m2.5s")) == 62.5
+    assert nodes._suggested_wait(Exception("try again in 1h2m58.272s")) == pytest.approx(3778.272)
     assert nodes._suggested_wait(Exception("something else")) is None
+
+
+class _FlakyLLM:
+    def __init__(self, *errors):
+        self.errors = list(errors)
+        self.calls = 0
+
+    async def ainvoke(self, _messages):
+        self.calls += 1
+        if self.errors:
+            raise self.errors.pop(0)
+        return AIMessage(content="ok")
+
+
+_TPM_429 = "Error code: 429 - rate_limit_exceeded on tokens per minute (TPM): Limit 8000. Please try again in 0.2s."
+_TPD_429 = ("Error code: 429 - rate_limit_exceeded on tokens per day (TPD): Limit 200000, "
+            "Used 195000, Requested 8000. Please try again in 1h2m58.272s.")
+
+
+async def test_daily_limit_fails_fast_without_retrying():
+    """Waiting an hour inside a run is not a retry; each attempt also spends a
+    request from the daily allowance."""
+    llm = _FlakyLLM(Exception(_TPD_429))
+    with pytest.raises(nodes.RateLimitExhausted, match="Daily model quota exhausted"):
+        await nodes._invoke_with_retry(llm, [])
+    assert llm.calls == 1
+
+
+async def test_per_minute_limit_is_retried_and_the_wait_reported(monkeypatch):
+    monkeypatch.setattr(nodes.random, "uniform", lambda a, b: 0.0)
+    llm = _FlakyLLM(Exception(_TPM_429))
+    response, retries, waited = await nodes._invoke_with_retry(llm, [])
+    assert response.content == "ok"
+    assert (retries, waited) == (1, pytest.approx(0.2))
 
 
 # ── Batched semantic search ───────────────────────────────────────────────────

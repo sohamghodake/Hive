@@ -37,17 +37,27 @@ MAX_TOOL_CHARS = int(os.getenv("MAX_TOOL_OUTPUT_CHARS", "6000"))
 MAX_LLM_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "6"))
 MAX_RETRY_WAIT = 65.0  # the TPM window is one minute; never wait longer than that
 
-# Groq states the wait it wants in the error text: "Please try again in 7.52s"
-# or "in 1m2.5s". Honouring it beats guessing with exponential backoff, which
-# gave up after ~15s while the per-minute window needed up to 60s to clear.
-_RETRY_AFTER = re.compile(r"try again in (?:(\d+)m)?([\d.]+)s", re.IGNORECASE)
+# Groq states the wait it wants in the error text: "Please try again in 7.52s",
+# "in 1m2.5s", or for the daily limit "in 1h2m58.272s". Honouring it beats
+# guessing with exponential backoff, which gave up after ~15s while the
+# per-minute window needed up to 60s to clear.
+_RETRY_AFTER = re.compile(
+    r"try again in (?:(\d+)h)?(?:(\d+)m)?(?:([\d.]+)s)?", re.IGNORECASE
+)
 
 
 def _suggested_wait(exc: Exception) -> float | None:
     m = _RETRY_AFTER.search(str(exc))
-    if not m:
+    if not m or not any(m.groups()):
         return None
-    return int(m.group(1) or 0) * 60 + float(m.group(2))
+    hours, minutes, seconds = m.groups()
+    return int(hours or 0) * 3600 + int(minutes or 0) * 60 + float(seconds or 0)
+
+
+class RateLimitExhausted(RuntimeError):
+    """The provider's quota will not refill within MAX_RETRY_WAIT — in practice
+    the daily token or request limit. Retrying only spends more of the daily
+    request allowance, so the run fails at once with a clear message."""
 
 # Cache one bound client per (model, tools) combination.
 _llm_cache: dict[tuple[str, tuple[str, ...]], object] = {}
@@ -92,12 +102,17 @@ async def _invoke_with_retry(llm, messages):
 
     Groq distinguishes two failures that both surface as quota errors: 429 means
     the per-minute budget is momentarily exhausted and retrying works, while 413
-    means this single request can never fit and retrying is pointless.
+    means this single request can never fit and retrying is pointless. A 429 for
+    the daily limit asks for a wait of up to hours; that is not transient either.
+
+    Returns (response, retries, seconds spent waiting) so the step can record how
+    much of its latency was the rate limiter rather than the model.
     """
     last_exc: Exception | None = None
+    waited = 0.0
     for attempt in range(MAX_LLM_RETRIES):
         try:
-            return await llm.ainvoke(messages)
+            return await llm.ainvoke(messages), attempt, waited
         except Exception as exc:
             last_exc = exc
             if _is_request_too_large(exc):
@@ -106,14 +121,24 @@ async def _invoke_with_retry(llm, messages):
                     "Shorten the agent's system prompt, reduce the task size, or "
                     "lower LLM_MAX_OUTPUT_TOKENS."
                 ) from exc
-            if not _is_rate_limit(exc) or attempt == MAX_LLM_RETRIES - 1:
+            if not _is_rate_limit(exc):
                 raise
-            delay = min(_suggested_wait(exc) or 2**attempt, MAX_RETRY_WAIT) + random.uniform(0.2, 1.0)
+            suggested = _suggested_wait(exc)
+            if "per day" in str(exc).lower() or (suggested or 0) > MAX_RETRY_WAIT:
+                raise RateLimitExhausted(
+                    "Daily model quota exhausted"
+                    + (f"; the provider asks to wait {suggested / 60:.0f} min" if suggested else "")
+                    + ". Try again later or switch the agent to another model."
+                ) from exc
+            if attempt == MAX_LLM_RETRIES - 1:
+                raise
+            delay = min(suggested or 2**attempt, MAX_RETRY_WAIT) + random.uniform(0.2, 1.0)
             logger.warning(
                 "rate limited, retrying in %.1fs (attempt %d/%d)",
                 delay, attempt + 1, MAX_LLM_RETRIES,
             )
             await asyncio.sleep(delay)
+            waited += delay
     raise last_exc  # pragma: no cover - loop always returns or raises
 
 
@@ -143,11 +168,23 @@ async def think(state: AgentState) -> AgentState:
         tuple(state.get("tool_names") or ()),
     )
     budget = _output_budget(state["messages"], len(state.get("tool_names") or ()))
-    response: AIMessage = await _invoke_with_retry(llm.bind(max_tokens=budget), state["messages"])
+    started = time.perf_counter()
+    response, retries, waited = await _invoke_with_retry(
+        llm.bind(max_tokens=budget), state["messages"]
+    )
+    elapsed = time.perf_counter() - started
     return {
         **state,
         "messages": [response],
         "steps_completed": state["steps_completed"] + 1,
+        # Persisted on the step: model time and rate-limiter time are separate
+        # numbers, so a slow run can be attributed to one or the other.
+        "call_stats": {
+            "llm_ms": int((elapsed - waited) * 1000),
+            "rate_limit_wait_s": round(waited, 1),
+            "retries": retries,
+            "max_tokens": budget,
+        },
     }
 
 
@@ -185,6 +222,7 @@ async def act(state: AgentState) -> AgentState:
 
         t = TOOL_MAP.get(tool_name)
         started = time.perf_counter()
+        full_chars = 0
         if tool_name not in allowed:
             content = f"Tool '{tool_name}' is not enabled for this agent."
             is_error = True
@@ -195,6 +233,7 @@ async def act(state: AgentState) -> AgentState:
             try:
                 result = await t.ainvoke(tool_input)
                 content = result if isinstance(result, str) else json.dumps(result)
+                full_chars = len(content)
                 content = _truncate(content)
                 is_error = False
             except Exception as exc:
@@ -209,6 +248,9 @@ async def act(state: AgentState) -> AgentState:
             "ts": datetime.now(timezone.utc).isoformat(),
             "duration_ms": int((time.perf_counter() - started) * 1000),
             "server": TOOL_SERVERS.get(tool_name),
+            # How often the cap cuts real content is the cost of the free tier.
+            "truncated": full_chars > MAX_TOOL_CHARS,
+            "full_chars": full_chars,
         })
         new_messages.append(ToolMessage(content=content, tool_call_id=tc["id"]))
 
