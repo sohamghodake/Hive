@@ -187,9 +187,13 @@ docker compose exec -e DATABASE_URL=postgresql+asyncpg://hive:hivepass@postgres:
 
 - **Tool scoping.** The model is bound only to the agent's tools, and `act` refuses
   any tool not granted, so the call never reaches an MCP server.
-- **SQL.** Queries run inside a Postgres `READ ONLY` transaction, so the database
-  itself rejects writes. A keyword filter in front also refuses stacked statements
-  and CTE-wrapped writes (`WITH t AS (...) DELETE ...`).
+- **SQL.** `mcp-db` connects as `hive_reader` (migration 003), a role with `SELECT`
+  on the six application tables and nothing else. `READ ONLY` alone was not enough:
+  it stops writes, but as the `hive` superuser the model's SQL could still call
+  `pg_read_file()` on the database server. Each query also runs in a `READ ONLY`
+  transaction with a 5 s `statement_timeout`, and a cursor stops the server after
+  200 rows instead of materialising the whole result. A keyword filter in front
+  refuses stacked statements and CTE-wrapped writes (`WITH t AS (...) DELETE ...`).
 - **Files.** Paths resolve and must stay inside `/workspace`, compared by path
   component — a string-prefix check would accept the sibling `/workspace_evil`.
 - **Outbound HTTP.** `http_get` resolves the host and refuses anything that is not a

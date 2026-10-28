@@ -17,8 +17,13 @@ from starlette.responses import JSONResponse
 
 from rag.embeddings import embed_query, to_pgvector
 
+# In docker-compose this is the hive_reader role (migration 003): SELECT on the
+# application tables and nothing else. The READ ONLY transaction below stops
+# writes, but it does not stop a superuser's reads — run as `hive`, the model's
+# SQL could call pg_read_file() on the database server's filesystem.
 DATABASE_URL = os.getenv("DATABASE_URL", "").replace("+asyncpg", "")
 MAX_ROWS = 200
+STATEMENT_TIMEOUT_MS = int(os.getenv("MCP_DB_STATEMENT_TIMEOUT_MS", "5000"))
 
 mcp = FastMCP(
     "mcp-db",
@@ -86,13 +91,23 @@ def _jsonable(value):
     return value
 
 
-async def _fetch(sql: str, *args) -> list[dict]:
+async def _fetch(sql: str, *args, limit: int | None = None) -> list[dict]:
     pool = await _get_pool()
     async with pool.acquire() as conn:
         # Postgres rejects any write inside a READ ONLY transaction, including
         # writes hidden in functions the keyword filter cannot see.
         async with conn.transaction(readonly=True):
-            rows = await conn.fetch(sql, *args)
+            # Set per transaction, not per connection: behind PgBouncer in
+            # transaction mode a session-level setting would leak to whichever
+            # client gets this server connection next. Without it, pg_sleep()
+            # or an accidental cross join holds a backend indefinitely.
+            await conn.execute(f"SET LOCAL statement_timeout = {STATEMENT_TIMEOUT_MS}")
+            if limit is None:
+                rows = await conn.fetch(sql, *args)
+            else:
+                # A cursor stops the server after `limit` rows; fetch() would
+                # materialise the whole result in this process before slicing.
+                rows = await (await conn.cursor(sql, *args)).fetch(limit)
     return [{k: _jsonable(v) for k, v in r.items()} for r in rows]
 
 
@@ -105,14 +120,16 @@ def _as_uuid(value: str) -> uuid.UUID:
 
 @mcp.tool
 async def query(sql: str) -> dict:
-    """Run a single read-only SQL statement (SELECT/WITH/EXPLAIN). Returns up to 200 rows."""
+    """Run a single read-only SQL statement (SELECT/WITH/EXPLAIN). Returns up to 200 rows;
+    `truncated` is true when there were more."""
     _check_readonly(sql)
     try:
-        rows = await _fetch(sql)
+        # One extra row distinguishes "exactly MAX_ROWS" from "more than that".
+        rows = await _fetch(sql, limit=MAX_ROWS + 1)
     except asyncpg.PostgresError as exc:
         # Surface the database's message so the model can correct its SQL.
-        raise ToolError(f"{type(exc).__name__}: {exc}")
-    return {"rows": rows[:MAX_ROWS], "count": len(rows), "truncated": len(rows) > MAX_ROWS}
+        raise ToolError(f"{type(exc).__name__}: {exc}") from None
+    return {"rows": rows[:MAX_ROWS], "count": min(len(rows), MAX_ROWS), "truncated": len(rows) > MAX_ROWS}
 
 
 @mcp.tool

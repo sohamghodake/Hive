@@ -11,6 +11,8 @@ services:
       # Application traffic goes through PgBouncer; migrations go direct.
       DATABASE_URL: postgresql+asyncpg://hive:hivepass@pgbouncer:6432/hive
       MIGRATION_DATABASE_URL: postgresql+asyncpg://hive:hivepass@postgres:5432/hive
+      # Read by migration 003 to set hive_reader's password.
+      MCP_DB_PASSWORD: ${MCP_DB_PASSWORD:-hivereader}
       MCP_FILE_URL: http://mcp-file:8001
       MCP_DB_URL: http://mcp-db:8002
       MCP_SEARCH_URL: http://mcp-search:8003
@@ -66,7 +68,9 @@ services:
       dockerfile: mcp_servers/mcp_db/Dockerfile
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://hive:hivepass@pgbouncer:6432/hive
+      # The model's SQL runs as hive_reader (migration 003): SELECT on the app
+      # tables only. As the `hive` superuser it could read server files.
+      DATABASE_URL: postgresql://hive_reader:${MCP_DB_PASSWORD:-hivereader}@pgbouncer:6432/hive
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/health')"]
       interval: 5s
@@ -123,6 +127,8 @@ services:
     environment:
       DB_USER: hive
       DB_PASSWORD: hivepass
+      READER_USER: hive_reader
+      READER_PASSWORD: ${MCP_DB_PASSWORD:-hivereader}
     depends_on:
       postgres:
         condition: service_healthy
